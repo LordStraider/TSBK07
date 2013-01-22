@@ -13,10 +13,24 @@ Y moves to the top.
 Maybe by getting a pointer to the triangle and changing color off it.
 -----
 
+
 1-2
-What is the purpose of the "in", "out" and "uniform" modifiers?
-What is the output of the vertex shader?
-What does the function glUniformMatrix4fv do?
+-What is the purpose of the "in", "out" and "uniform" modifiers?
+
+"in" and "out" are used for the pipeline to specify the vertices that the gpu is working with. "uniform" is used for user defined matrices that are to transform, rotate etc the vertices.
+"in" comes from previous stages and "out" goes to the next stage in the pipeline.
+-----
+
+-What is the output of the vertex shader?
+
+A rotated, transformed (etc) object as a matrix.
+-----
+
+-What does the function glUniformMatrix4fv do?
+
+It sets the variables in the .vert file so it can use the matrix multiplactions.
+-----
+
 
 1-3
 What is the purpose of glutPostRedisplay()?
