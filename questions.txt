@@ -1,0 +1,47 @@
+1-1
+- Where is the origin placed in the on-screen coordinate system?
+
+Middle of the screen. 0.0, 0.0, 0.0.
+-----
+- Which direction are the X and Y axes pointing in the on-screen coordinate system?
+
+X moves to the right.
+Y moves to the top.
+-----
+- The triangle color is controlled from the fragment shader. Would it be possible to control it form the main program? How?
+
+Maybe by getting a pointer to the triangle and changing color off it.
+-----
+
+1-2
+What is the purpose of the "in", "out" and "uniform" modifiers?
+What is the output of the vertex shader?
+What does the function glUniformMatrix4fv do?
+
+1-3
+What is the purpose of glutPostRedisplay()?
+What is the frame rate of the animation?
+Did you get a noticable flicker? Did the double buffering help?
+
+1-4
+Did you need to do anything different when uploading the color data?
+The "in" and "out" modifiers are now used for something different. What?
+What is this kind of shading called? What could we use otherwise?
+
+1-5
+What problems did you encounter while building the cube?
+How do you change the facing of a polygon?
+
+1-6
+Why do we need normal vectors for a model?
+What did you do in your fragment shader?
+Should a normal vector always be perpendicular to a certain triangle? If not, why?
+Now we are using glBindBuffer and glBufferData again. They deal with buffers, but in what way?
+
+1-7
+Did you implement your light calculations in the vertex or fragment shader? So, which kind of shading did you implement?
+Some geometry data must be vec4, others are just as well vec3's. Which ones, and why? How about vertices, light source, normal vectors...?
+
+1-8
+Was the difference big? If not, why?
+You are doing almost the same operations. So what is the difference performance-wise? Compare the two methods from a performance standpoint.
