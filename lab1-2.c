@@ -16,6 +16,7 @@
 	#endif
 #endif
 #include "GL_utilities.h"
+#include <math.h>
 
 /* Globals
 // Data would normally be read from files*/
@@ -28,8 +29,19 @@ GLfloat myMatrix[] = {  1.0f, 0.0f, 0.0f, 0.5f,
                         0.0f, 0.0f, 1.0f, 0.0f,
                         0.0f, 0.0f, 0.0f, 1.0f };
 
+GLfloat rotationMatrix[] = {	0.7f, -0.7f, 0.0f, 0.0f,
+								0.7f, 0.7f, 0.0f, 0.0f,
+								0.0f, 0.0f, 1.0f, 0.0f,
+								0.0f, 0.0f, 0.0f, 1.0f };
 /* vertex array object*/
 unsigned int vertexArrayObjID;
+
+void set_sincos(GLfloat* m, double alpha) { 
+	m[0] = cos(alpha);
+	m[1] = -sin(alpha);
+	m[4] = sin(alpha);
+	m[5] = cos(alpha);
+}
 
 void init(void)
 {
@@ -64,6 +76,8 @@ void init(void)
 	glVertexAttribPointer(glGetAttribLocation(program, "in_Position"), 3, GL_FLOAT, GL_FALSE, 0, 0); 
 	glEnableVertexAttribArray(glGetAttribLocation(program, "in_Position"));
     glUniformMatrix4fv(glGetUniformLocation(program, "myMatrix"), 1, GL_TRUE, myMatrix);
+    set_sincos(&rotationMatrix, 0.0);
+	glUniformMatrix4fv(glGetUniformLocation(program, "myRotationMatrix"), 1, GL_TRUE, rotationMatrix);
 	/* End of upload of geometry*/
 	
 	printError("init arrays");

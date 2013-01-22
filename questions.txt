@@ -28,7 +28,7 @@ A rotated, transformed (etc) object as a matrix.
 
 -What does the function glUniformMatrix4fv do?
 
-It sets the variables in the .vert file so it can use the matrix multiplactions.
+It sets the variables in the .vert file so it can use the matrix multiplactions. It also transforms a GLfloat vector into a matrix.
 -----
 
 
