@@ -19,9 +19,9 @@
 
 /* Globals
 // Data would normally be read from files*/
-GLfloat vertices[] = {	-0.5f,-0.5f,0.0f,
-						-0.5f,0.5f,0.0f,
-						0.5f,-0.5f,0.0f };
+GLfloat vertices[] = {	1.0f,1.0f,1.0f,
+						-1.0f,-1.0f,1.0f,
+						-0.5f,-1.0f,1.0f };
 
 /* vertex array object*/
 unsigned int vertexArrayObjID;
@@ -37,7 +37,7 @@ void init(void)
 	dumpInfo();
 
 	/* GL inits*/
-	glClearColor(0.2,0.2,0.5,0);
+	glClearColor(0.5,0.5,0.1,0.3);
 	glDisable(GL_DEPTH_TEST);
 	printError("GL inits");
 
