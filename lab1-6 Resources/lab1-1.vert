@@ -1,15 +1,18 @@
 #version 150
 
-in  vec3 in_Position;
-uniform mat4 myTranslationMatrix;
-uniform mat4 myRotationMatrix;
-uniform mat4 myRotationMatrix2;
-uniform mat4 myProjMatrix;
-in  vec3 in_Color;
-out vec3 ex_Color;
+in  vec3 inPosition;
+in  vec3 inNormal;
+out vec3 exNormal; // Phong
+
+// NY
+uniform mat4 mdlMatrix;
+uniform mat4 camMatrix;
+uniform mat4 projMatrix;
 
 void main(void)
 {
-	ex_Color = in_Color;
-	gl_Position = myProjMatrix * myTranslationMatrix * myRotationMatrix * myRotationMatrix2 * vec4(in_Position, 1.0);
+	mat3 normalMatrix = mat3(camMatrix * mdlMatrix); // Cheap normal matrix
+	exNormal = normalMatrix * inNormal; // Phong
+
+	gl_Position = projMatrix * camMatrix * mdlMatrix * vec4(inPosition, 1.0);
 }

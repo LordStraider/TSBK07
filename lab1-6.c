@@ -1,47 +1,36 @@
-/* Lab 1-1.
-// This is the same as the first simple example in the course book,
-// but with a few error checks.
-// Remember to copy your file to a new on appropriate places during the lab so you keep old results.
-// Note that the files "lab1-1.frag", "lab1-1.vert" are required.
+// Stanford bunny loaded from OBJ, perspective projection
 
-// Includes vary a bit with platforms.
+// Compile under Linux:
+// gcc perspectivebunny.c ../Common/GL_utilities.c ../Common/loadobj.c -I"../Common" -lGL -lglut -o perspectivebunny
+// granted than GL_utilities are in /Common
+// Mac: Compiles under Lightweight IDE, granted than the Common files are in the paths (typically under the default /Developer/MyStandardUnits)
+
+
 // MS Windows needs GLEW or glee.
-// Mac uses slightly different paths.*/
 #ifdef __APPLE__
 	#include <OpenGL/gl3.h>
 	#include "MicroGlut.h"
-	/* A little linking trick for Lightweight IDE*/
-	#if 0
-		#import <Cocoa/Cocoa.h>
-	#endif
+	// linking hint for Lightweight IDE
+	//uses framework Cocoa
 #endif
 #include "GL_utilities.h"
-#include <math.h>
+
 #include "loadobj.h"
+//#include "LoadTGA.h"
 
-/* Globals*/
-Model *m;
-m = LoadModel("bunny.obj");
-
-GLfloat myRotationMatrix[] = {  1.0f, 0.0f, 0.0f, 0.0f,
-		                        0.0f, 1.0f, 0.0f, 0.0f,
-		                        0.0f, 0.0f, 1.0f, 0.0f,
-		                        0.0f, 0.0f, 0.0f, 1.0f };
-
-GLfloat myRotationMatrix2[] = {  1.0f, 0.0f, 0.0f, 0.0f,
-		                        0.0f, 1.0f, 0.0f, 0.0f,
-		                        0.0f, 0.0f, 1.0f, 0.0f,
-		                        0.0f, 0.0f, 0.0f, 1.0f };
-
-GLfloat myTranslationMatrix[] = {	1.0f, 0.0f, 0.0f, 0.0f,
-				                    0.0f, 1.0f, 0.0f, 0.0f,
-				                    0.0f, 0.0f, 1.0f, -2.0f,
-				                    0.0f, 0.0f, 0.0f, 1.0f };
-
-/* vertex array object*/
-unsigned int vertexArrayObjID;
-
-GLuint program;
+// NEW
+GLfloat rotationMatrix0[] = { 0.7f, -0.7f, 0.0f, 0.0f,
+						0.7f, 0.7f, 0.0f, 0.0f,
+						0.0f, 0.0f, 1.0f, 0.0f,
+						0.0f, 0.0f, 0.0f, 1.0f };
+GLfloat rotationMatrix[] = { 0.7f, 0.0f, -0.7f, 0.0f,
+						0.0f, 1.0f, 0.0f, 0.0f,
+						0.7f, 0.0f, 0.7f, 0.0f,
+						0.0f, 0.0f, 0.0f, 1.0f };
+GLfloat translationMatrix[] = { 1.0f, 0.0f, 0.0f, 0.0f,
+						0.0f, 1.0f, 0.0f, 0.0f,
+						0.0f, 0.0f, 1.0f, -2.0f,
+						0.0f, 0.0f, 0.0f, 1.0f };
 
 #define near 1.0
 #define far 30.0
@@ -49,102 +38,93 @@ GLuint program;
 #define left -1.0
 #define top 1.0
 #define bottom -1.0
-GLfloat myProjMatrix[] = {	2.0f*near/(right-left), 0.0f, 0.0f, 0.0f,
-				            0.0f, 2.0f*near/(top-bottom), 0.0f, 0.0f,
-				            0.0f, 0.0f, -(far+near)/(far-near), (-2*far*near)/(far-near),
-				            0.0f, 0.0f, -1.0f, 0.0f };
+GLfloat projectionMatrix[] = {	2.0f*near/(right-left), 0.0f, (right+left)/(right-left), 0.0f,
+											0.0f, 2.0f*near/(top-bottom), (top+bottom)/(top-bottom), 0.0f,
+											0.0f, 0.0f, -(far + near)/(far - near), -2*far*near/(far - near),
+											0.0f, 0.0f, -1.0f, 0.0f };
 
-void set_sincos(GLfloat* m, float alpha) { 
-	m[0] = cos(alpha);
-	m[1] = -sin(alpha);
-	m[4] = sin(alpha);
-	m[5] = cos(alpha);
-}
+// vertex array object
+unsigned int bunnyVertexArrayObjID;
+Model *m;
 
-void set_sincos2(GLfloat* m, float alpha) { 
-	m[5] = cos(alpha);
-	m[6] = sin(alpha);
-	m[9] = -sin(alpha);
-	m[10] = cos(alpha);
-}
+void init(void)
+{
+	// three vertex buffer objects, used for uploading the data
+	unsigned int bunnyVertexBufferObjID;
+	unsigned int bunnyIndexBufferObjID;
+	unsigned int bunnyNormalBufferObjID;
 
-void init(void) {
-	/* two vertex buffer objects, used for uploading the*/
-	unsigned int vertexBufferObjID;
-	unsigned int colorBufferObjID;
-	/* Reference to shader program*/
+	// Reference to shader program
+	GLuint program;
 
-	dumpInfo();
-
-	/* GL inits*/
-	glClearColor(0.9,0.9,0.9,1.0);
-    glEnable(GL_DEPTH_TEST);
+	// GL inits
+	glClearColor(0.2,0.2,0.5,0);
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_TRUE);
 	printError("GL inits");
 
-	/* Load and compile shader*/
+	// Load and compile shader
 	program = loadShaders("lab1-1.vert", "lab1-1.frag");
+	glUseProgram(program);
 	printError("init shader");
-	/* Upload geometry to the GPU:*/
 	
-	/* Allocate and activate Vertex Array Object*/
-	glGenVertexArrays(1, &vertexArrayObjID);
-	glBindVertexArray(vertexArrayObjID);
-	/* Allocate Vertex Buffer Objects*/
-	glGenBuffers(1, &vertexBufferObjID);
-	glGenBuffers(1, &colorBufferObjID);
+	// Upload geometry to the GPU:
+	m = LoadModel("bunny.obj");
 	
-	/* VBO for vertex data*/
-	glBindBuffer(GL_ARRAY_BUFFER, vertexBufferObjID);
-	glBufferData(GL_ARRAY_BUFFER, 36*3*sizeof(GLfloat), vertices, GL_STATIC_DRAW);
-	glVertexAttribPointer(glGetAttribLocation(program, "in_Position"), 3, GL_FLOAT, GL_FALSE, 0, 0); 
-	glEnableVertexAttribArray(glGetAttribLocation(program, "in_Position"));
+	glGenVertexArrays(1, &bunnyVertexArrayObjID);
+	glGenBuffers(1, &bunnyVertexBufferObjID);
+	glGenBuffers(1, &bunnyIndexBufferObjID);
+	glGenBuffers(1, &bunnyNormalBufferObjID);
+	
+	glBindVertexArray(bunnyVertexArrayObjID);
 
-	/* VBO for colour data*/
-	glBindBuffer(GL_ARRAY_BUFFER, colorBufferObjID);
-	glBufferData(GL_ARRAY_BUFFER, 36*3*sizeof(GLfloat), colors, GL_STATIC_DRAW);
-	glVertexAttribPointer(glGetAttribLocation(program, "in_Color"), 3, GL_FLOAT, GL_FALSE, 0, 0);
-	glEnableVertexAttribArray(glGetAttribLocation(program, "in_Color"));
+	// VBO for vertex data
+	glBindBuffer(GL_ARRAY_BUFFER, bunnyVertexBufferObjID);
+	glBufferData(GL_ARRAY_BUFFER, m->numVertices*3*sizeof(GLfloat), m->vertexArray, GL_STATIC_DRAW);
+	glVertexAttribPointer(glGetAttribLocation(program, "inPosition"), 3, GL_FLOAT, GL_FALSE, 0, 0); 
+	glEnableVertexAttribArray(glGetAttribLocation(program, "inPosition"));
 
+	// VBO for normal data
+	glBindBuffer(GL_ARRAY_BUFFER, bunnyNormalBufferObjID);
+	glBufferData(GL_ARRAY_BUFFER, m->numVertices*3*sizeof(GLfloat), m->normalArray, GL_STATIC_DRAW);
+	glVertexAttribPointer(glGetAttribLocation(program, "inNormal"), 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(glGetAttribLocation(program, "inNormal"));
+	
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bunnyIndexBufferObjID);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, m->numIndices*sizeof(GLuint), m->indexArray, GL_STATIC_DRAW);
 
-	glUniformMatrix4fv(glGetUniformLocation(program, "myTranslationMatrix"), 1, GL_TRUE, myTranslationMatrix);
-	glUniformMatrix4fv(glGetUniformLocation(program, "myProjMatrix"), 1, GL_TRUE, myProjMatrix);
- 	/* End of upload of geometry*/
+	// End of upload of geometry
+
+// NEW
+	glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, rotationMatrix);
+	glUniformMatrix4fv(glGetUniformLocation(program, "camMatrix"), 1, GL_TRUE, translationMatrix);
+	glUniformMatrix4fv(glGetUniformLocation(program, "projMatrix"), 1, GL_TRUE, projectionMatrix);
 	
 	printError("init arrays");
 }
 
-void display(void) {
+
+void display(void)
+{
 	printError("pre display");
 
-	/* clear the screen*/
+	// clear the screen
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	GLfloat t = (GLfloat)glutGet(GLUT_ELAPSED_TIME);
-	set_sincos(&myRotationMatrix, t/900);
-	set_sincos2(&myRotationMatrix2, t/1300);
-	glUniformMatrix4fv(glGetUniformLocation(program, "myRotationMatrix"), 1, GL_TRUE, myRotationMatrix);
-	glUniformMatrix4fv(glGetUniformLocation(program, "myRotationMatrix2"), 1, GL_TRUE, myRotationMatrix2);
-
-	glBindVertexArray(vertexArrayObjID);	/* Select VAO*/
-	glDrawArrays(GL_TRIANGLES, 0, 36*3);	/* draw object*/
+	glBindVertexArray(bunnyVertexArrayObjID);	// Select VAO
+	glDrawElements(GL_TRIANGLES, m->numIndices, GL_UNSIGNED_INT, 0L);
 	
 	printError("display");
 	
 	glutSwapBuffers();
 }
 
-void OnTimer(int value) {
-    glutPostRedisplay();
-    glutTimerFunc(20, &OnTimer, value);
-}
-
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
 	glutInit(&argc, argv);
-	glutCreateWindow ("GL3 white triangle example");
-    glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
+	glutCreateWindow ("GL3 obj and perspective example");
 	glutDisplayFunc(display); 
-	glutTimerFunc(20, &OnTimer, 0);
 	init ();
 	glutMainLoop();
-	return 0;
 }
