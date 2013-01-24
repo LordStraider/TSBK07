@@ -86,7 +86,7 @@ void display(void)
 	/* clear the screen*/
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	a-=0.1;
+	a-w=0.1;
 	GLfloat t = (GLfloat)glutGet(GLUT_ELAPSED_TIME);
 	set_sincos(&myRotationMatrix, a);
     glUniformMatrix4fv(glGetUniformLocation(program, "myMatrix"), 1, GL_TRUE, myRotationMatrix);
