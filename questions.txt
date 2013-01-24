@@ -54,8 +54,13 @@ Vertex shader - alternative
 
 
 1-5
-What problems did you encounter while building the cube?
-How do you change the facing of a polygon?
+- What problems did you encounter while building the cube?
+
+Yes, it was complicated to get right number of triangles, to get the cube to show. Problem with number of vertices that was drawn... etc... And projection matrix.
+-----
+- How do you change the facing of a polygon?
+
+Rotate it in 3d together with clearing z-buffering
 ---------------
 
 
@@ -64,15 +69,3 @@ Why do we need normal vectors for a model?
 What did you do in your fragment shader?
 Should a normal vector always be perpendicular to a certain triangle? If not, why?
 Now we are using glBindBuffer and glBufferData again. They deal with buffers, but in what way?
----------------
-
-
-1-7
-Did you implement your light calculations in the vertex or fragment shader? So, which kind of shading did you implement?
-Some geometry data must be vec4, others are just as well vec3's. Which ones, and why? How about vertices, light source, normal vectors...?
----------------
-
-
-1-8
-Was the difference big? If not, why?
-You are doing almost the same operations. So what is the difference performance-wise? Compare the two methods from a performance standpoint.
