@@ -20,19 +20,22 @@
 
 /* Globals
 // Data would normally be read from files*/
-GLfloat vertices[] = {	 1.0f,  1.0f, 1.0f,
-						-1.0f, -1.0f, 1.0f,
-						-0.5f, -1.0f, 1.0f };
+GLfloat vertices[] = {	 0.5f,  0.5f, 0.0f,
+						-0.5f,  0.5f, 0.0f,
+						 0.5f, -0.5f, 0.0f };
 
 GLfloat myRotationMatrix[] = {  1.0f, 0.0f, 0.0f, 0.0f,
                         0.0f, 1.0f, 0.0f, 0.0f,
                         0.0f, 0.0f, 1.0f, 0.0f,
                         0.0f, 0.0f, 0.0f, 1.0f };
 
+GLfloat myTranslationMatrix[] = {	1.0f, 0.0f, 0.0f, -0.5f,
+				                    0.0f, 1.0f, 0.0f, -0.5f,
+				                    0.0f, 0.0f, 1.0f, 0.0f,
+				                    0.0f, 0.0f, 0.0f, 1.0f };
 /* vertex array object*/
 unsigned int vertexArrayObjID;
 
-float a;
 GLuint program;
 
 void set_sincos(GLfloat* m, float alpha) { 
@@ -60,7 +63,6 @@ void init(void)
 	/* Load and compile shader*/
 	program = loadShaders("lab1-1.vert", "lab1-1.frag");
 	printError("init shader");
-	a=0.1;
 	/* Upload geometry to the GPU:
 	
 	// Allocate and activate Vertex Array Object*/
@@ -86,10 +88,11 @@ void display(void)
 	/* clear the screen*/
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	a-w=0.1;
 	GLfloat t = (GLfloat)glutGet(GLUT_ELAPSED_TIME);
-	set_sincos(&myRotationMatrix, a);
+	set_sincos(&myRotationMatrix, t/1000);
     glUniformMatrix4fv(glGetUniformLocation(program, "myMatrix"), 1, GL_TRUE, myRotationMatrix);
+
+	glUniformMatrix4fv(glGetUniformLocation(program, "myTranslationMatrix"), 1, GL_TRUE, myTranslationMatrix);
 
 
 	glBindVertexArray(vertexArrayObjID);	/* Select VAO*/

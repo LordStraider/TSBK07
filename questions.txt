@@ -31,19 +31,25 @@ It sets the variables in the .vert file so it can use the matrix multiplactions.
 
 
 1-3
-What is the purpose of glutPostRedisplay()?
-What is the frame rate of the animation?
+- What is the frame rate of the animation?
 
-frame updates every 20 ms => 50 fps
-
-Did you get a noticable flicker? Did the double buffering help?
+Frame updates every 20 ms => 50 fps
 ---------------
 
 
 1-4
-Did you need to do anything different when uploading the color data?
-The "in" and "out" modifiers are now used for something different. What?
-What is this kind of shading called? What could we use otherwise?
+- Did you need to do anything different when uploading the color data?
+
+Not except the naming of ex_Color in .vert and .frag.
+-----
+- The "in" and "out" modifiers are now used for something different. What?
+
+?
+-----
+- What is this kind of shading called? What could we use otherwise?
+
+Fragment shader - used
+Vertex shader - alternative
 ---------------
 
 
