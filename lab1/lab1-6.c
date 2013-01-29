@@ -18,7 +18,7 @@
 #include "loadobj.h"		
 /* Globals*/
 
-GLfloat rotationMatrix0[] = { 	0.7f, -0.7f, 0.0f, 0.0f,
+GLfloat rotationMatrix2[] = { 	0.7f, -0.7f, 0.0f, 0.0f,
 								0.7f, 0.7f, 0.0f, 0.0f,
 								0.0f, 0.0f, 1.0f, 0.0f,
 								0.0f, 0.0f, 0.0f, 1.0f };
@@ -37,10 +37,10 @@ GLfloat translationMatrix[] = { 1.0f, 0.0f, 0.0f, 0.0f,
 #define left -1.0
 #define top 1.0
 #define bottom -1.0
-GLfloat projectionMatrix[] = {	2.0f*near/(right-left), 0.0f, (right+left)/(right-left), 0.0f,
-											0.0f, 2.0f*near/(top-bottom), (top+bottom)/(top-bottom), 0.0f,
-											0.0f, 0.0f, -(far + near)/(far - near), -2*far*near/(far - near),
-											0.0f, 0.0f, -1.0f, 0.0f };
+GLfloat projMatrix[] = {2.0f*near/(right-left), 0.0f, (right+left)/(right-left), 0.0f,
+						0.0f, 2.0f*near/(top-bottom), (top+bottom)/(top-bottom), 0.0f,
+						0.0f, 0.0f, -(far + near)/(far - near), -2*far*near/(far - near),
+						0.0f, 0.0f, -1.0f, 0.0f };
 
 unsigned int bunnyVertexArrayObjID;
 Model *m;
@@ -94,9 +94,10 @@ void init(void) {
 
  	/* End of upload of geometry*/
 
-	glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, rotationMatrix);
-	glUniformMatrix4fv(glGetUniformLocation(program, "camMatrix"), 1, GL_TRUE, translationMatrix);
-	glUniformMatrix4fv(glGetUniformLocation(program, "projMatrix"), 1, GL_TRUE, projectionMatrix);
+	glUniformMatrix4fv(glGetUniformLocation(program, "rotationMatrix"), 1, GL_TRUE, rotationMatrix);
+	glUniformMatrix4fv(glGetUniformLocation(program, "rotationMatrix2"), 1, GL_TRUE, rotationMatrix2);
+	glUniformMatrix4fv(glGetUniformLocation(program, "translationMatrix"), 1, GL_TRUE, translationMatrix);
+	glUniformMatrix4fv(glGetUniformLocation(program, "projMatrix"), 1, GL_TRUE, projMatrix);
 
 
 	printError("init arrays");
