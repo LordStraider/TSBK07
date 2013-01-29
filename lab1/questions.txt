@@ -65,7 +65,14 @@ Rotate it in 3d together with clearing z-buffering
 
 
 1-6
-Why do we need normal vectors for a model?
-What did you do in your fragment shader?
-Should a normal vector always be perpendicular to a certain triangle? If not, why?
-Now we are using glBindBuffer and glBufferData again. They deal with buffers, but in what way?
+- Why do we need normal vectors for a model?
+
+
+- What did you do in your fragment shader?
+
+
+- Should a normal vector always be perpendicular to a certain triangle? If not, why?
+
+
+- Now we are using glBindBuffer and glBufferData again. They deal with buffers, but in what way?
+
