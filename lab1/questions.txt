@@ -67,12 +67,16 @@ Rotate it in 3d together with clearing z-buffering
 1-6
 - Why do we need normal vectors for a model?
 
-
+To know the direction of the model.
+-----
 - What did you do in your fragment shader?
 
-
+We added light to the model.
+-----
 - Should a normal vector always be perpendicular to a certain triangle? If not, why?
 
-
+Yes they should be since we need to know the normal vector of the area.
+-----
 - Now we are using glBindBuffer and glBufferData again. They deal with buffers, but in what way?
 
+glBindBuffer binds the ID of the bunny and glBufferData binds the vertices to the ID.
