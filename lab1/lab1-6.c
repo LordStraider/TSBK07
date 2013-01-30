@@ -14,18 +14,26 @@
 	//uses framework Cocoa
 #endif
 #include "GL_utilities.h"
-
-#include "loadobj.h"		
+#include <math.h>
+#include "loadobj.h"
 /* Globals*/
+#define PI 3.14159
 
-GLfloat rotationMatrix2[] = { 	0.7f, -0.7f, 0.0f, 0.0f,
-								0.7f, 0.7f, 0.0f, 0.0f,
+GLfloat rotationMatrixX[] = { 	1.0f, 0.0f, 0.0f, 0.0f,
+								0.0f, 1.0f, 0.0f, 0.0f,
 								0.0f, 0.0f, 1.0f, 0.0f,
 								0.0f, 0.0f, 0.0f, 1.0f };
-GLfloat rotationMatrix[] = { 	0.7f, 0.0f, -0.7f, 0.0f,
+
+GLfloat rotationMatrixY[] = { 	1.0f, 0.0f, 0.0f, 0.0f,
 								0.0f, 1.0f, 0.0f, 0.0f,
-								0.7f, 0.0f, 0.7f, 0.0f,
+								0.0f, 0.0f, 1.0f, 0.0f,
 								0.0f, 0.0f, 0.0f, 1.0f };
+
+GLfloat rotationMatrixZ[] = { 	1.0f, 0.0f, 0.0f, 0.0f,
+								0.0f, 1.0f, 0.0f, 0.0f,
+								0.0f, 0.0f, 1.0f, 0.0f,
+								0.0f, 0.0f, 0.0f, 1.0f };
+
 GLfloat translationMatrix[] = { 1.0f, 0.0f, 0.0f, 0.0f,
 								0.0f, 1.0f, 0.0f, 0.0f,
 								0.0f, 0.0f, 1.0f, -2.0f,
@@ -44,6 +52,33 @@ GLfloat projMatrix[] = {2.0f*near/(right-left), 0.0f, (right+left)/(right-left),
 
 unsigned int bunnyVertexArrayObjID;
 Model *m;
+GLuint program;
+
+
+
+
+
+
+void setSincosX(GLfloat* m, float alpha) { 
+	m[5] = cos(alpha);
+	m[6] = -sin(alpha);
+	m[9] = sin(alpha);
+	m[10] = cos(alpha);
+}
+
+void setSincosY(GLfloat* m, float alpha) { 
+	m[0] = cos(alpha);
+	m[2] = sin(alpha);
+	m[8] = -sin(alpha);
+	m[10] = cos(alpha);
+}
+
+void setSincosZ(GLfloat* m, float alpha) { 
+	m[0] = cos(alpha);
+	m[1] = -sin(alpha);
+	m[4] = sin(alpha);
+	m[5] = cos(alpha);
+}
 
 void init(void) {	
 	/* two vertex buffer objects, used for uploading the*/
@@ -51,7 +86,6 @@ void init(void) {
 	unsigned int bunnyVertexBufferObjID;
 	unsigned int bunnyIndexBufferObjID;
 	unsigned int bunnyNormalBufferObjID;
-	GLuint program;
 
 	/* Reference to shader program*/
 
@@ -94,8 +128,9 @@ void init(void) {
 
  	/* End of upload of geometry*/
 
-	glUniformMatrix4fv(glGetUniformLocation(program, "rotationMatrix"), 1, GL_TRUE, rotationMatrix);
-	glUniformMatrix4fv(glGetUniformLocation(program, "rotationMatrix2"), 1, GL_TRUE, rotationMatrix2);
+	glUniformMatrix4fv(glGetUniformLocation(program, "rotationMatrixX"), 1, GL_TRUE, rotationMatrixX);
+	glUniformMatrix4fv(glGetUniformLocation(program, "rotationMatrixY"), 1, GL_TRUE, rotationMatrixY);
+	glUniformMatrix4fv(glGetUniformLocation(program, "rotationMatrixZ"), 1, GL_TRUE, rotationMatrixZ);
 	glUniformMatrix4fv(glGetUniformLocation(program, "translationMatrix"), 1, GL_TRUE, translationMatrix);
 	glUniformMatrix4fv(glGetUniformLocation(program, "projMatrix"), 1, GL_TRUE, projMatrix);
 
@@ -109,6 +144,13 @@ void display(void) {
 	/* clear the screen*/
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	GLfloat t = (GLfloat)glutGet(GLUT_ELAPSED_TIME);
+
+	setSincosY(&rotationMatrixY, t/1000);
+	setSincosZ(&rotationMatrixZ, t/1000);
+	glUniformMatrix4fv(glGetUniformLocation(program, "rotationMatrixY"), 1, GL_TRUE, rotationMatrixY);
+	glUniformMatrix4fv(glGetUniformLocation(program, "rotationMatrixZ"), 1, GL_TRUE, rotationMatrixZ);
+
     glBindVertexArray(bunnyVertexArrayObjID);    // Select VAO
     glDrawElements(GL_TRIANGLES, m->numIndices, GL_UNSIGNED_INT, 0L);
 	
@@ -117,10 +159,16 @@ void display(void) {
 	glutSwapBuffers();
 }
 
+void OnTimer(int value) {
+    glutPostRedisplay();
+    glutTimerFunc(20, &OnTimer, value);
+}
+
 int main(int argc, char *argv[]) {
 	glutInit(&argc, argv);
 	glutCreateWindow ("GL3 white triangle example");
 	glutDisplayFunc(display); 
+	glutTimerFunc(20, &OnTimer, 0);
 	init ();
 	glutMainLoop();
 }

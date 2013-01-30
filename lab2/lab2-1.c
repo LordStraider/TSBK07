@@ -15,33 +15,42 @@
 #endif
 #include "GL_utilities.h"
 #include "LoadTGA.h"
+#include <math.h>
 #include "loadobj.h"
-#include <math.h>	
 /* Globals*/
+#define PI 3.14159
 
-GLfloat rotationMatrix2[] = { 	0.7f, -0.7f, 0.0f, 0.0f,
-								0.7f, 0.7f, 0.0f, 0.0f,
+GLfloat rotationMatrixX[] = { 	1.0f, 0.0f, 0.0f, 0.0f,
+								0.0f, 1.0f, 0.0f, 0.0f,
 								0.0f, 0.0f, 1.0f, 0.0f,
 								0.0f, 0.0f, 0.0f, 1.0f };
-GLfloat rotationMatrix[] = { 	0.7f, 0.0f, -0.7f, 0.0f,
+
+GLfloat rotationMatrixY[] = { 	1.0f, 0.0f, 0.0f, 0.0f,
 								0.0f, 1.0f, 0.0f, 0.0f,
-								0.7f, 0.0f, 0.7f, 0.0f,
+								0.0f, 0.0f, 1.0f, 0.0f,
 								0.0f, 0.0f, 0.0f, 1.0f };
+
+GLfloat rotationMatrixZ[] = { 	1.0f, 0.0f, 0.0f, 0.0f,
+								0.0f, 1.0f, 0.0f, 0.0f,
+								0.0f, 0.0f, 1.0f, 0.0f,
+								0.0f, 0.0f, 0.0f, 1.0f };
+								
 GLfloat translationMatrix[] = { 1.0f, 0.0f, 0.0f, 0.0f,
 								0.0f, 1.0f, 0.0f, 0.0f,
 								0.0f, 0.0f, 1.0f, -2.0f,
 								0.0f, 0.0f, 0.0f, 1.0f };
 
+
 #define near 1.0
 #define far 30.0
-#define right 1.0
-#define left -1.0
-#define top 1.0
-#define bottom -1.0
-GLfloat projMatrix[] = {2.0f*near/(right-left), 0.0f, (right+left)/(right-left), 0.0f,
-						0.0f, 2.0f*near/(top-bottom), (top+bottom)/(top-bottom), 0.0f,
-						0.0f, 0.0f, -(far + near)/(far - near), -2*far*near/(far - near),
-						0.0f, 0.0f, -1.0f, 0.0f };
+#define right 0.5
+#define left -0.5
+#define top 0.5
+#define bottom -0.5
+GLfloat projMatrix[] = {    2.0f*near/(right-left), 0.0f, (right+left)/(right-left), 0.0f,
+                            0.0f, 2.0f*near/(top-bottom), (top+bottom)/(top-bottom), 0.0f,
+                            0.0f, 0.0f, -(far + near)/(far - near), -2*far*near/(far - near),
+                            0.0f, 0.0f, -1.0f, 0.0f };
 
 unsigned int bunnyVertexArrayObjID;
 Model *m;
@@ -51,18 +60,25 @@ GLuint program;
 
 
 
-void set_sincos(GLfloat* m, float alpha) { 
+void setSincosX(GLfloat* m, float alpha) { 
+	m[5] = cos(alpha);
+	m[6] = -sin(alpha);
+	m[9] = sin(alpha);
+	m[10] = cos(alpha);
+}
+
+void setSincosY(GLfloat* m, float alpha) { 
+	m[0] = cos(alpha);
+	m[2] = sin(alpha);
+	m[8] = -sin(alpha);
+	m[10] = cos(alpha);
+}
+
+void setSincosZ(GLfloat* m, float alpha) { 
 	m[0] = cos(alpha);
 	m[1] = -sin(alpha);
 	m[4] = sin(alpha);
 	m[5] = cos(alpha);
-}
-
-void set_sincos2(GLfloat* m, float alpha) { 
-	m[5] = cos(alpha);
-	m[6] = sin(alpha);
-	m[9] = -sin(alpha);
-	m[10] = cos(alpha);
 }
 
 void init(void) {	
@@ -127,6 +143,9 @@ void init(void) {
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, m->numIndices*sizeof(GLuint), m->indexArray, GL_STATIC_DRAW);
 
  	/* End of upload of geometry*/
+	glUniformMatrix4fv(glGetUniformLocation(program, "rotationMatrixX"), 1, GL_TRUE, rotationMatrixX);
+	glUniformMatrix4fv(glGetUniformLocation(program, "rotationMatrixY"), 1, GL_TRUE, rotationMatrixY);
+	glUniformMatrix4fv(glGetUniformLocation(program, "rotationMatrixZ"), 1, GL_TRUE, rotationMatrixZ);
 	glUniformMatrix4fv(glGetUniformLocation(program, "translationMatrix"), 1, GL_TRUE, translationMatrix);
 	glUniformMatrix4fv(glGetUniformLocation(program, "projMatrix"), 1, GL_TRUE, projMatrix);
 
@@ -141,10 +160,11 @@ void display(void) {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	GLfloat t = (GLfloat)glutGet(GLUT_ELAPSED_TIME);
-	set_sincos(&rotationMatrix, t/900);
-	set_sincos2(&rotationMatrix2, t/1300);
-	glUniformMatrix4fv(glGetUniformLocation(program, "rotationMatrix"), 1, GL_TRUE, rotationMatrix);
-	glUniformMatrix4fv(glGetUniformLocation(program, "rotationMatrix2"), 1, GL_TRUE, rotationMatrix2);
+
+	setSincosY(&rotationMatrixY, t/1000);
+	setSincosZ(&rotationMatrixZ, t/1000);
+	glUniformMatrix4fv(glGetUniformLocation(program, "rotationMatrixY"), 1, GL_TRUE, rotationMatrixY);
+	glUniformMatrix4fv(glGetUniformLocation(program, "rotationMatrixZ"), 1, GL_TRUE, rotationMatrixZ);
 
     glBindVertexArray(bunnyVertexArrayObjID);    // Select VAO
     glDrawElements(GL_TRIANGLES, m->numIndices, GL_UNSIGNED_INT, 0L);
