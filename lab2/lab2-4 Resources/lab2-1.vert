@@ -8,6 +8,7 @@ out vec3 exNormal;
 out vec2 exTexCoord;
 
 uniform mat4 mdlMatrix;
+uniform mat4 camMatrix;
 uniform mat4 projMatrix;
 
 void main(void)
@@ -17,5 +18,5 @@ void main(void)
 	mat3 normalMatrix = mat3(mdlMatrix);
 	exNormal = normalMatrix * inNormal;
 
-	gl_Position = projMatrix * mdlMatrix * vec4(inPosition, 1.0);
+	gl_Position = projMatrix * camMatrix * mdlMatrix * vec4(inPosition, 1.0);
 }

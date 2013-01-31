@@ -22,7 +22,7 @@
 /* Globals*/
 #define PI 3.14159
 
-GLfloat rot[16], trans[16], total[16];
+GLfloat rot[16], trans[16], total[16], cam[16];
 
 
 #define near 1.0
@@ -108,12 +108,19 @@ void init(void) {
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, m->numIndices*sizeof(GLuint), m->indexArray, GL_STATIC_DRAW);
 
 
+ 	/* End of upload of geometry*/
+ 	Point3D p,l;
+ 	SetVector(0.0, 4.0, 0.0, &p);
+ 	SetVector(0.0, 0.0, -3.0, &l);
+
+	lookAt(&p, &l, 0.0, 1.0, 0.0, &cam);
+
 	T(0, 0, -2, trans);
 	Ry(0.0, rot);
     Mult(rot, trans, total);
 
- 	/* End of upload of geometry*/
 	glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, total);
+	glUniformMatrix4fv(glGetUniformLocation(program, "camMatrix"), 1, GL_TRUE, cam);
 	glUniformMatrix4fv(glGetUniformLocation(program, "projMatrix"), 1, GL_TRUE, projMatrix);
 
 
@@ -128,13 +135,13 @@ void display(void) {
 
 	GLfloat t = (GLfloat)glutGet(GLUT_ELAPSED_TIME);
 
-	T(0, 0, -2, trans);
+	/*T(0, 0, -2, trans);
 	Ry(t/1000, rot);
     Mult(trans, rot, total);
 	Rx(t/1000, rot);
     Mult(total, rot, total);
 	glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, total);
-
+*/
     glBindVertexArray(bunnyVertexArrayObjID);    // Select VAO
     glDrawElements(GL_TRIANGLES, m->numIndices, GL_UNSIGNED_INT, 0L);
 	

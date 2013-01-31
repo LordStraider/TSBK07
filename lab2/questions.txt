@@ -28,7 +28,7 @@ We placed it Z = -2
 
 2-4
 - Given a certain vector for v, is there some place you can't place the camera?
-
+No...?
 
 
 
