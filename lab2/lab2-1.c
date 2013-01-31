@@ -34,7 +34,7 @@ GLfloat rotationMatrixZ[] = { 	1.0f, 0.0f, 0.0f, 0.0f,
 								0.0f, 1.0f, 0.0f, 0.0f,
 								0.0f, 0.0f, 1.0f, 0.0f,
 								0.0f, 0.0f, 0.0f, 1.0f };
-								
+
 GLfloat translationMatrix[] = { 1.0f, 0.0f, 0.0f, 0.0f,
 								0.0f, 1.0f, 0.0f, 0.0f,
 								0.0f, 0.0f, 1.0f, -2.0f,
@@ -55,6 +55,7 @@ GLfloat projMatrix[] = {    2.0f*near/(right-left), 0.0f, (right+left)/(right-le
 unsigned int bunnyVertexArrayObjID;
 Model *m;
 GLuint program;
+GLuint myTex;
 
 
 
@@ -84,7 +85,6 @@ void setSincosZ(GLfloat* m, float alpha) {
 void init(void) {	
 	/* two vertex buffer objects, used for uploading the*/
 
-	GLuint myTex;
 	unsigned int bunnyVertexBufferObjID;
 	unsigned int bunnyIndexBufferObjID;
 	unsigned int bunnyNormalBufferObjID;
@@ -93,12 +93,11 @@ void init(void) {
 	/* Reference to shader program*/
 
 	/* GL inits*/
-	LoadTGATextureSimple("maskros512.tga", &myTex);
-
 	glClearColor(0.2,0.2,0.5,0);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_TRUE);
+//	glActiveTexture(GL_TEXTURE0);
 	printError("GL inits");
 
 	/* Load and compile shader*/
@@ -108,24 +107,27 @@ void init(void) {
 	/* Upload geometry to the GPU:*/
 
 	m = LoadModel("bunnyplus.obj");
+	LoadTGATextureSimple("maskros512.tga", &myTex);
 
     glGenVertexArrays(1, &bunnyVertexArrayObjID);
     glGenBuffers(1, &bunnyVertexBufferObjID);
     glGenBuffers(1, &bunnyIndexBufferObjID);
     glGenBuffers(1, &bunnyNormalBufferObjID);
+    glGenBuffers(1, &bunnyTexCoordBufferObjID);
     
     glBindVertexArray(bunnyVertexArrayObjID);
 	
 	glBindTexture(GL_TEXTURE_2D, myTex);
 	glUniform1i(glGetUniformLocation(program, "texUnit"), 0); // Texture unit 0
 
+
     if (m->texCoordArray != NULL)
     {
-        glBindBuffer(GL_ARRAY_BUFFER, bunnyTexCoordBufferObjID);
-        glBufferData(GL_ARRAY_BUFFER, m->numVertices*2*sizeof(GLfloat), m->texCoordArray, GL_STATIC_DRAW);
-        glVertexAttribPointer(glGetAttribLocation(program, "inTexCoord"), 2, GL_FLOAT, GL_FALSE, 0, 0);
-        glEnableVertexAttribArray(glGetAttribLocation(program, "inTexCoord"));
-    }
+	    glBindBuffer(GL_ARRAY_BUFFER, bunnyTexCoordBufferObjID);
+	    glBufferData(GL_ARRAY_BUFFER, m->numVertices*2*sizeof(GLfloat), m->texCoordArray, GL_STATIC_DRAW);
+	    glVertexAttribPointer(glGetAttribLocation(program, "inTexCoord"), 2, GL_FLOAT, GL_FALSE, 0, 0);
+	    glEnableVertexAttribArray(glGetAttribLocation(program, "inTexCoord"));
+	}
 
     // VBO for vertex data
     glBindBuffer(GL_ARRAY_BUFFER, bunnyVertexBufferObjID);

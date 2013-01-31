@@ -1,15 +1,17 @@
 #version 150
-
+ 
+in vec2 exTexCoord;
+in vec3 exNormal; 
 out vec4 outColor;
-in vec3 exNormal; // Phong
+uniform sampler2D texUnit;
 
-in vec4 exTexCoord;
 
 void main(void)
 {
-	const vec3 light = vec3(0.8, 0.8, 0.88);
+	const vec3 light = vec3(0.7, 0.7, 0.7);
 	float shade;
 	
 	shade = dot(normalize(exNormal), light);
-	outColor = exTexCoord * vec4(shade, shade, shade, 1.0);
+
+	outColor = texture(texUnit, exTexCoord) * vec4(shade, shade, shade, 1.0);;
 }
