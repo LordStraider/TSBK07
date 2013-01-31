@@ -107,7 +107,7 @@ void init(void) {
 	/* Upload geometry to the GPU:*/
 
 	m = LoadModel("bunnyplus.obj");
-	LoadTGATextureSimple("maskros512.tga", &myTex);
+	//LoadTGATextureSimple("maskros512.tga", &myTex);
 
     glGenVertexArrays(1, &bunnyVertexArrayObjID);
     glGenBuffers(1, &bunnyVertexBufferObjID);
@@ -117,8 +117,8 @@ void init(void) {
     
     glBindVertexArray(bunnyVertexArrayObjID);
 	
-	glBindTexture(GL_TEXTURE_2D, myTex);
-	glUniform1i(glGetUniformLocation(program, "texUnit"), 0); // Texture unit 0
+	//glBindTexture(GL_TEXTURE_2D, myTex);
+	//glUniform1i(glGetUniformLocation(program, "texUnit"), 0); // Texture unit 0
 
 
     if (m->texCoordArray != NULL)
