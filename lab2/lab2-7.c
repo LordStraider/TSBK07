@@ -37,7 +37,8 @@ GLfloat projMatrix[] = {        2.0f*near/(right-left), 0.0f, (right+left)/(righ
 		                        0.0f, 0.0f, -1.0f, 0.0f };
 
 unsigned int bunnyVertexArrayObjID;
-Model *m;
+Model *bunny;
+Model *cow;
 GLuint program;
 GLuint myTex;
 
@@ -45,12 +46,8 @@ GLuint myTex;
 
 
 
-void init(void) {	
+void init(void) {
 	/* two vertex buffer objects, used for uploading the*/
-
-	unsigned int bunnyVertexBufferObjID;
-	unsigned int bunnyIndexBufferObjID;
-	unsigned int bunnyNormalBufferObjID;
 	unsigned int bunnyTexCoordBufferObjID;
 
 	/* Reference to shader program*/
@@ -69,44 +66,26 @@ void init(void) {
 	printError("init shader");
 	/* Upload geometry to the GPU:*/
 
-	m = LoadModel("bunnyplus.obj");
+	bunny = LoadModelPlus("bunnyplus.obj");
+    cow = LoadModelPlus("cow.obj");
+
 	LoadTGATextureSimple("maskros512.tga", &myTex);
 
-    glGenVertexArrays(1, &bunnyVertexArrayObjID);
-    glGenBuffers(1, &bunnyVertexBufferObjID);
-    glGenBuffers(1, &bunnyIndexBufferObjID);
-    glGenBuffers(1, &bunnyNormalBufferObjID);
     glGenBuffers(1, &bunnyTexCoordBufferObjID);
-    
+
     glBindVertexArray(bunnyVertexArrayObjID);
-	
+
 	glBindTexture(GL_TEXTURE_2D, myTex);
 	glUniform1i(glGetUniformLocation(program, "texUnit"), 0); // Texture unit 0
 
 
-    if (m->texCoordArray != NULL)
+    if (bunny->texCoordArray != NULL)
     {
 	    glBindBuffer(GL_ARRAY_BUFFER, bunnyTexCoordBufferObjID);
-	    glBufferData(GL_ARRAY_BUFFER, m->numVertices*2*sizeof(GLfloat), m->texCoordArray, GL_STATIC_DRAW);
+	    glBufferData(GL_ARRAY_BUFFER, bunny->numVertices*2*sizeof(GLfloat), bunny->texCoordArray, GL_STATIC_DRAW);
 	    glVertexAttribPointer(glGetAttribLocation(program, "inTexCoord"), 2, GL_FLOAT, GL_FALSE, 0, 0);
 	    glEnableVertexAttribArray(glGetAttribLocation(program, "inTexCoord"));
 	}
-
-    // VBO for vertex data
-    glBindBuffer(GL_ARRAY_BUFFER, bunnyVertexBufferObjID);
-    glBufferData(GL_ARRAY_BUFFER, m->numVertices*3*sizeof(GLfloat), m->vertexArray, GL_STATIC_DRAW);
-    glVertexAttribPointer(glGetAttribLocation(program, "inPosition"), 3, GL_FLOAT, GL_FALSE, 0, 0); 
-    glEnableVertexAttribArray(glGetAttribLocation(program, "inPosition"));
-
-    // VBO for normal data
-    glBindBuffer(GL_ARRAY_BUFFER, bunnyNormalBufferObjID);
-    glBufferData(GL_ARRAY_BUFFER, m->numVertices*3*sizeof(GLfloat), m->normalArray, GL_STATIC_DRAW);
-    glVertexAttribPointer(glGetAttribLocation(program, "inNormal"), 3, GL_FLOAT, GL_FALSE, 0, 0);
-    glEnableVertexAttribArray(glGetAttribLocation(program, "inNormal"));
-    
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bunnyIndexBufferObjID);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m->numIndices*sizeof(GLuint), m->indexArray, GL_STATIC_DRAW);
-
 
  	/* End of upload of geometry*/
  	Point3D p,l;
@@ -142,11 +121,11 @@ void display(void) {
     Mult(total, rot, total);
 	glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, total);
 
-    glBindVertexArray(bunnyVertexArrayObjID);    // Select VAO
-    glDrawElements(GL_TRIANGLES, m->numIndices, GL_UNSIGNED_INT, 0L);
-	
+    DrawModel(bunny, program, "inPosition", "inNormal", "inTexCoord");
+    DrawModel(cow, program, "inPosition", "inNormal", "inTexCoord");
+
 	printError("display");
-	
+
 	glutSwapBuffers();
 }
 
@@ -158,7 +137,7 @@ void OnTimer(int value) {
 int main(int argc, char *argv[]) {
 	glutInit(&argc, argv);
 	glutCreateWindow ("GL3 white triangle example");
-	glutDisplayFunc(display); 
+	glutDisplayFunc(display);
 	glutTimerFunc(20, &OnTimer, 0);
 	init ();
 	glutMainLoop();
