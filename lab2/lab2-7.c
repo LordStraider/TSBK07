@@ -1,17 +1,6 @@
-/* Lab 1-1.
-// This is the same as the first simple example in the course book,
-// but with a few error checks.
-// Remember to copy your file to a new on appropriate places during the lab so you keep old results.
-// Note that the files "lab1-1.frag", "lab1-1.vert" are required.
-
-// Includes vary a bit with platforms.
-// MS Windows needs GLEW or glee.
-// Mac uses slightly different paths.*/
 #ifdef __APPLE__
 	#include <OpenGL/gl3.h>
 	#include "MicroGlut.h"
-	// linking hint for Lightweight IDE
-	//uses framework Cocoa
 #endif
 #include "GL_utilities.h"
 #include "LoadTGA.h"
@@ -36,22 +25,16 @@ GLfloat projMatrix[] = {        2.0f*near/(right-left), 0.0f, (right+left)/(righ
 		                        0.0f, 0.0f, -(far + near)/(far - near), -2*far*near/(far - near),
 		                        0.0f, 0.0f, -1.0f, 0.0f };
 
-unsigned int bunnyVertexArrayObjID;
 Model *bunny;
 Model *cow;
 GLuint program;
 GLuint myTex;
-
+Point3D p,l;
 
 
 
 
 void init(void) {
-	/* two vertex buffer objects, used for uploading the*/
-	unsigned int bunnyTexCoordBufferObjID;
-
-	/* Reference to shader program*/
-
 	/* GL inits*/
 	glClearColor(0.2,0.2,0.5,0);
 	glEnable(GL_DEPTH_TEST);
@@ -71,35 +54,16 @@ void init(void) {
 
 	LoadTGATextureSimple("maskros512.tga", &myTex);
 
-    glGenBuffers(1, &bunnyTexCoordBufferObjID);
-
-    glBindVertexArray(bunnyVertexArrayObjID);
-
 	glBindTexture(GL_TEXTURE_2D, myTex);
 	glUniform1i(glGetUniformLocation(program, "texUnit"), 0); // Texture unit 0
 
-
-    if (bunny->texCoordArray != NULL)
-    {
-	    glBindBuffer(GL_ARRAY_BUFFER, bunnyTexCoordBufferObjID);
-	    glBufferData(GL_ARRAY_BUFFER, bunny->numVertices*2*sizeof(GLfloat), bunny->texCoordArray, GL_STATIC_DRAW);
-	    glVertexAttribPointer(glGetAttribLocation(program, "inTexCoord"), 2, GL_FLOAT, GL_FALSE, 0, 0);
-	    glEnableVertexAttribArray(glGetAttribLocation(program, "inTexCoord"));
-	}
-
  	/* End of upload of geometry*/
- 	Point3D p,l;
- 	SetVector(0.0, 0.0, 1.0, &p);
- 	SetVector(0.0, 0.0, -3.0, &l);
-
-	lookAt(&p, &l, 0.0, 1.0, 0.0, &cam);
 
 	T(0, 0, -2, trans);
 	Ry(0.0, rot);
     Mult(rot, trans, total);
 
 	glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, total);
-	glUniformMatrix4fv(glGetUniformLocation(program, "camMatrix"), 1, GL_TRUE, cam);
 	glUniformMatrix4fv(glGetUniformLocation(program, "projMatrix"), 1, GL_TRUE, projMatrix);
 
 
@@ -114,12 +78,13 @@ void display(void) {
 
 	GLfloat t = (GLfloat)glutGet(GLUT_ELAPSED_TIME);
 
-	T(0, 0, -2, trans);
-	Ry(t/1000, rot);
-    Mult(trans, rot, total);
-	Rx(t/1000, rot);
-    Mult(total, rot, total);
-	glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, total);
+ 	SetVector(5.0, 5.0, 0.0, &p);
+ 	SetVector(0.0, 0.0, -2.0, &l);
+
+	lookAt(&p, &l, 0.0, 1.0, 0.0, &cam);
+	Rz(t/1000, rot);
+    Mult(rot, cam, cam);
+	glUniformMatrix4fv(glGetUniformLocation(program, "camMatrix"), 1, GL_TRUE, cam);
 
     DrawModel(bunny, program, "inPosition", "inNormal", "inTexCoord");
     DrawModel(cow, program, "inPosition", "inNormal", "inTexCoord");
