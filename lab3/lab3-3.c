@@ -32,15 +32,19 @@ GLfloat zValue;
 GLfloat xLookAt;
 GLfloat yLookAt;
 
+GLuint program;
+Point3D p,l;
+
 Model *bunny;
 Model *cow;
 Model *blade;
 Model *windmillWalls;
 Model *windmillRoof;
 Model *windmillBalcony;
-GLuint program;
-GLuint myTex;
-Point3D p,l;
+Model *skyBox;
+
+GLuint bunnyTex;
+GLuint skyBoxTex;
 
 
 
@@ -74,10 +78,11 @@ void init(void) {
     windmillRoof = LoadModelPlus("windmill-roof.obj");
     windmillWalls = LoadModelPlus("windmill-walls.obj");
     blade = LoadModelPlus("blade.obj");
+    skyBox = LoadModelPlus("skybox.obj");
 
-	LoadTGATextureSimple("maskros512.tga", &myTex);
+	LoadTGATextureSimple("maskros512.tga", &bunnyTex);
+	LoadTGATextureSimple("skyBox512.tga", &skyBoxTex);
 
-	glBindTexture(GL_TEXTURE_2D, myTex);
 	glUniform1i(glGetUniformLocation(program, "texUnit"), 0); // Texture unit 0
 
  	/* End of upload of geometry*/
@@ -99,7 +104,21 @@ void display(void) {
 
 
 	glUniformMatrix4fv(glGetUniformLocation(program, "camMatrix"), 1, GL_TRUE, cam);
-/*
+
+
+	glDisable(GL_DEPTH_TEST);
+	glDisable(GL_CULL_FACE);
+
+	T(0, 0, 0, trans);
+	glBindTexture(GL_TEXTURE_2D, skyBoxTex);
+	glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, trans);
+    DrawModel(skyBox, program, "inPosition", "inNormal", "inTexCoord");
+
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_CULL_FACE);
+
+
+	glBindTexture(GL_TEXTURE_2D, bunnyTex);
 	T(0, 0, -6, trans);
 	Ry(t/1000, rot);
     Mult(trans, rot, total);
@@ -107,26 +126,26 @@ void display(void) {
     Mult(total, rot, total);
 	glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, total);
 
-    DrawModel(bunny, program, "inPosition", "inNormal", "inTexCoord");
-    DrawModel(cow, program, "inPosition", "inNormal", "inTexCoord");
-*/
-/*	T(0, 0, -2, trans);
-	glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, trans);
-    DrawModel(blade, program, "inPosition", "inNormal", "inTexCoord");
-	T(0, 1, -2, trans);
-	glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, trans);
-    DrawModel(windmillWalls, program, "inPosition", "inNormal", "inTexCoord");
-	T(0, 2, -2, trans);
-	glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, trans);
-    DrawModel(windmillRoof, program, "inPosition", "inNormal", "inTexCoord");
-	T(1, 0, -2, trans);
-	glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, trans);
-    DrawModel(windmillBalcony, program, "inPosition", "inNormal", "inTexCoord");
-*/
-    T(-3, -7, 0, trans);
+//    DrawModel(bunny, program, "inPosition", "inNormal", "inTexCoord");
+//    DrawModel(cow, program, "inPosition", "inNormal", "inTexCoord");
+
+    T(-3.9, -7.4, 0, trans);
     S(0.8, 0.8, 0.8, shear);
     Mult(trans, shear, total);
-	glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, total);    DrawModel(windmillWalls, program, "inPosition", "inNormal", "inTexCoord");
+	glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, total);
+    DrawModel(windmillRoof, program, "inPosition", "inNormal", "inTexCoord");
+
+    T(-3.9, -7.4, 0, trans);
+    S(0.8, 0.8, 0.8, shear);
+    Mult(trans, shear, total);
+	glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, total);
+    DrawModel(windmillBalcony, program, "inPosition", "inNormal", "inTexCoord");
+
+    T(-3.9, -7.4, 0, trans);
+    S(0.8, 0.8, 0.8, shear);
+    Mult(trans, shear, total);
+	glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, total);    
+	DrawModel(windmillWalls, program, "inPosition", "inNormal", "inTexCoord");
 
     T(0, 0, 0, trans);
     S(0.5, 0.5, 0.5, shear);
@@ -175,7 +194,8 @@ void MouseController(int x, int y){
 	} else {
 		yLookAt += 0.08;
 	}
-
+	
+//	glutWarpPointer(100, 100);
  	SetVector(xLookAt, yLookAt, 0, &l);
 }
 
