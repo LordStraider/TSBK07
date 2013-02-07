@@ -25,6 +25,8 @@ GLfloat projMatrix[] = {        2.0f*near/(right-left), 0.0f, (right+left)/(righ
                                 0.0f, 0.0f, -(far + near)/(far - near), -2*far*near/(far - near),
                                 0.0f, 0.0f, -1.0f, 0.0f };
 
+GLfloat camPos;
+GLfloat camMod;
 GLfloat xModify;
 GLfloat xValue;
 GLfloat zModify;
@@ -62,8 +64,6 @@ void init(void) {
     glActiveTexture(GL_TEXTURE0);
     printError("GL inits");
 
-    xModify = 0.0;
-    zModify = 0.0;
     xValue = 0.0;
     zValue = -2.0;
     yLookAt = 0.0;
@@ -109,23 +109,29 @@ void display(void) {
     glUseProgram(program);
 
     GLfloat t = (GLfloat)glutGet(GLUT_ELAPSED_TIME);
-    SetVector(xValue, 6.0, (zValue+3), &p);
-    SetVector(xValue, 6.0, zValue, &l);
+    camPos += camMod;
+    SetVector(xValue + 3 * cos(camPos), 2.0, zValue + 3 * sin(camPos), &p);
+    SetVector(xValue, 2.5, zValue, &l);
 
 
+    lookAt(&p, &l, 0.0, 1.0, 0.0, &cam);
+    cam[3] = 0;
+    cam[7] = 0;
+    cam[11] = 0;
+    glUniformMatrix4fv(glGetUniformLocation(program, "camMatrix"), 1, GL_TRUE, cam);
+  
 
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_CULL_FACE);
 
     T(0, 0, 0, trans);
     glBindTexture(GL_TEXTURE_2D, skyBoxTex);
-    T(0, 0, 0, cam);
-    glUniformMatrix4fv(glGetUniformLocation(program, "camMatrix"), 1, GL_TRUE, cam);
     glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, trans);
     DrawModel(skyBox, program, "inPosition", "inNormal", "inTexCoord");
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
+
 
 
     lookAt(&p, &l, 0.0, 1.0, 0.0, &cam);
@@ -134,7 +140,7 @@ void display(void) {
 //    DrawModel(bunny, program, "inPosition", "inNormal", "inTexCoord");
 //    DrawModel(cow, program, "inPosition", "inNormal", "inTexCoord");
 
-    T(0, 1, 0, trans);
+    T(0, 0, 0, trans);
     S(70,0, 70, shear);
     Mult(shear, trans, total);
     glBindTexture(GL_TEXTURE_2D, groundTex);
@@ -200,19 +206,26 @@ void MouseController(int x, int y){
 void OnTimer(int value) {
     xModify = 0.0;
     zModify = 0.0;
+    camMod = 0.0;
     
     
     if (keyIsDown('w')){
-        zModify = -0.08;
+        zModify = -0.15;
     } 
     if (keyIsDown('s')){
-        zModify = 0.08;
+        zModify = 0.15;
     } 
     if (keyIsDown('a')){
-        xModify = -0.08;
+        xModify = -0.15;
     } 
     if (keyIsDown('d')){
-        xModify = 0.08;
+        xModify = 0.15;
+    }
+
+    if (keyIsDown('x')) {
+        camMod = 0.15;
+    } else if (keyIsDown('z')) {
+        camMod = -0.15;
     }
 
     xValue += xModify;

@@ -14,8 +14,21 @@
 GLfloat rot[16], trans[16], shear[16], total[16], cam[16];
 
 
+Point3D lightSourcesColorsArr[] = { {1.0f, 0.0f, 0.0f}, // Red light
+                                 {0.0f, 1.0f, 0.0f}, // Green light
+                                 {0.0f, 0.0f, 1.0f}, // Blue light
+                                 {1.0f, 1.0f, 1.0f} }; // White light
+
+GLfloat specularExponent[] = {10.0, 20.0, 60.0, 5.0};
+GLint isDirectional[] = {0,0,1,1};
+
+Point3D lightSourcesDirectionsPositions[] = { {10.0f, 5.0f, 0.0f}, // Red light, positional
+                                       {0.0f, 5.0f, 10.0f}, // Green light, positional
+                                       {-1.0f, 0.0f, 0.0f}, // Blue light along X
+                                       {0.0f, 0.0f, -1.0f} }; // White light along Z
+                                       
 #define near 1.0
-#define far 30.0
+#define far 90.0
 #define right 0.5
 #define left -0.5
 #define top 0.5
@@ -25,6 +38,8 @@ GLfloat projMatrix[] = {        2.0f*near/(right-left), 0.0f, (right+left)/(righ
                                 0.0f, 0.0f, -(far + near)/(far - near), -2*far*near/(far - near),
                                 0.0f, 0.0f, -1.0f, 0.0f };
 
+GLfloat camPos;
+GLfloat camMod;
 GLfloat xModify;
 GLfloat xValue;
 GLfloat zModify;
@@ -33,11 +48,9 @@ GLfloat xLookAt;
 GLfloat yLookAt;
 
 GLuint program;
-GLuint programShadow;
+GLuint programShade;
 Point3D p,l;
 
-Model *bunny;
-Model *cow;
 Model *blade;
 Model *windmillWalls;
 Model *windmillRoof;
@@ -62,8 +75,6 @@ void init(void) {
     glActiveTexture(GL_TEXTURE0);
     printError("GL inits");
 
-    xModify = 0.0;
-    zModify = 0.0;
     xValue = 0.0;
     zValue = -2.0;
     yLookAt = 0.0;
@@ -71,13 +82,11 @@ void init(void) {
 
     /* Load and compile shader*/
     program = loadShaders("lab3-1.vert", "lab3-1.frag");
-    programShadow = loadShaders("shadow.vert", "shadow.frag");
+    programShade = loadShaders("Shade.vert", "Shade.frag");
     glUseProgram(program);
     printError("init shader");
     /* Upload geometry to the GPU:*/
 
-    bunny = LoadModelPlus("bunnyplus.obj");
-    cow = LoadModelPlus("cow.obj");
     windmillBalcony = LoadModelPlus("windmill-balcony.obj");
     windmillRoof = LoadModelPlus("windmill-roof.obj");
     windmillWalls = LoadModelPlus("windmill-walls.obj");
@@ -93,8 +102,8 @@ void init(void) {
 
     /* End of upload of geometry*/
     glUniformMatrix4fv(glGetUniformLocation(program, "projMatrix"), 1, GL_TRUE, projMatrix);
-    glUseProgram(programShadow);
-    glUniformMatrix4fv(glGetUniformLocation(programShadow, "projMatrix"), 1, GL_TRUE, projMatrix);
+    glUseProgram(programShade);
+    glUniformMatrix4fv(glGetUniformLocation(programShade, "projMatrix"), 1, GL_TRUE, projMatrix);
 
 
     printError("init arrays");
@@ -109,18 +118,23 @@ void display(void) {
     glUseProgram(program);
 
     GLfloat t = (GLfloat)glutGet(GLUT_ELAPSED_TIME);
-    SetVector(xValue, 6.0, (zValue+3), &p);
-    SetVector(xValue, 6.0, zValue, &l);
+    camPos += camMod;
+    SetVector(xValue + 3 * cos(camPos), 2.0, zValue + 3 * sin(camPos), &p);
+    SetVector(xValue, 2.5, zValue, &l);
 
 
+    lookAt(&p, &l, 0.0, 1.0, 0.0, &cam);
+    cam[3] = 0;
+    cam[7] = 0;
+    cam[11] = 0;
+    glUniformMatrix4fv(glGetUniformLocation(program, "camMatrix"), 1, GL_TRUE, cam);
+  
 
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_CULL_FACE);
 
     T(0, 0, 0, trans);
     glBindTexture(GL_TEXTURE_2D, skyBoxTex);
-    T(0, 0, 0, cam);
-    glUniformMatrix4fv(glGetUniformLocation(program, "camMatrix"), 1, GL_TRUE, cam);
     glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, trans);
     DrawModel(skyBox, program, "inPosition", "inNormal", "inTexCoord");
 
@@ -143,25 +157,25 @@ void display(void) {
 
 
 
-    glUseProgram(programShadow);
-    glUniformMatrix4fv(glGetUniformLocation(programShadow, "camMatrix"), 1, GL_TRUE, cam);
+    glUseProgram(programShade);
+    glUniformMatrix4fv(glGetUniformLocation(programShade, "camMatrix"), 1, GL_TRUE, cam);
     T(-3.9, 0, 0, trans);
     S(0.8, 0.8, 0.8, shear);
     Mult(trans, shear, total);
-    glUniformMatrix4fv(glGetUniformLocation(programShadow, "mdlMatrix"), 1, GL_TRUE, total);
-    DrawModel(windmillRoof, programShadow, "inPosition", "inNormal", "inTexCoord");
+    glUniformMatrix4fv(glGetUniformLocation(programShade, "mdlMatrix"), 1, GL_TRUE, total);
+    DrawModel(windmillRoof, programShade, "inPosition", "inNormal", "inTexCoord");
 
     T(-3.9, 0, 0, trans);
     S(0.8, 0.8, 0.8, shear);
     Mult(trans, shear, total);
-    glUniformMatrix4fv(glGetUniformLocation(programShadow, "mdlMatrix"), 1, GL_TRUE, total);
-    DrawModel(windmillBalcony, programShadow, "inPosition", "inNormal", "inTexCoord");
+    glUniformMatrix4fv(glGetUniformLocation(programShade, "mdlMatrix"), 1, GL_TRUE, total);
+    DrawModel(windmillBalcony, programShade, "inPosition", "inNormal", "inTexCoord");
 
     T(-3.9, 0, 0, trans);
     S(0.8, 0.8, 0.8, shear);
     Mult(trans, shear, total);
-    glUniformMatrix4fv(glGetUniformLocation(programShadow, "mdlMatrix"), 1, GL_TRUE, total);    
-    DrawModel(windmillWalls, programShadow, "inPosition", "inNormal", "inTexCoord");
+    glUniformMatrix4fv(glGetUniformLocation(programShade, "mdlMatrix"), 1, GL_TRUE, total);    
+    DrawModel(windmillWalls, programShade, "inPosition", "inNormal", "inTexCoord");
 
     int i;
     for (i = 0; i < 4; i++) {
@@ -170,8 +184,8 @@ void display(void) {
         Mult(trans, shear, total);
         Rx(i * PI / 2 + t/1000, rot);
         Mult(total, rot, total);
-        glUniformMatrix4fv(glGetUniformLocation(programShadow, "mdlMatrix"), 1, GL_TRUE, total);
-        DrawModel(blade, programShadow, "inPosition", "inNormal", "inTexCoord");
+        glUniformMatrix4fv(glGetUniformLocation(programShade, "mdlMatrix"), 1, GL_TRUE, total);
+        DrawModel(blade, programShade, "inPosition", "inNormal", "inTexCoord");
     }
 
 
@@ -200,19 +214,26 @@ void MouseController(int x, int y){
 void OnTimer(int value) {
     xModify = 0.0;
     zModify = 0.0;
+    camMod = 0.0;
     
     
     if (keyIsDown('w')){
-        zModify = -0.08;
+        zModify = -0.15;
     } 
     if (keyIsDown('s')){
-        zModify = 0.08;
+        zModify = 0.15;
     } 
     if (keyIsDown('a')){
-        xModify = -0.08;
+        xModify = -0.15;
     } 
     if (keyIsDown('d')){
-        xModify = 0.08;
+        xModify = 0.15;
+    }
+
+    if (keyIsDown('x')) {
+        camMod = 0.08;
+    } else if (keyIsDown('z')) {
+        camMod = -0.08;
     }
 
     xValue += xModify;
@@ -230,7 +251,7 @@ int main(int argc, char *argv[]) {
     glutCreateWindow ("GL3 white triangle example");
     glutDisplayFunc(display);
     initKeymapManager();
-//  glutPassiveMotionFunc(MouseController);
+    //glutPassiveMotionFunc(MouseController);
     glutTimerFunc(20, &OnTimer, 0);
     init ();
     glutMainLoop();

@@ -110,7 +110,7 @@ void init(void) {
 
  	/* End of upload of geometry*/
  	Point3D p,l;
- 	SetVector(0.0, 0.0, 1.0, &p);
+ 	SetVector(0.0, 0.0, 0.0, &p);
  	SetVector(0.0, 0.0, -3.0, &l);
 
 	lookAt(&p, &l, 0.0, 1.0, 0.0, &cam);
