@@ -87,64 +87,35 @@ void display(void) {
 
 
 	glUniformMatrix4fv(glGetUniformLocation(program, "camMatrix"), 1, GL_TRUE, cam);
-/*
-	T(0, 0, -6, trans);
-	Ry(t/1000, rot);
-    Mult(trans, rot, total);
-	Rx(t/1000, rot);
-    Mult(total, rot, total);
-	glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, total);
 
-    DrawModel(bunny, program, "inPosition", "inNormal", "inTexCoord");
-    DrawModel(cow, program, "inPosition", "inNormal", "inTexCoord");
-*/
-/*	T(0, 0, -2, trans);
-	glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, trans);
-    DrawModel(blade, program, "inPosition", "inNormal", "inTexCoord");
-	T(0, 1, -2, trans);
-	glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, trans);
-    DrawModel(windmillWalls, program, "inPosition", "inNormal", "inTexCoord");
-	T(0, 2, -2, trans);
-	glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, trans);
-    DrawModel(windmillRoof, program, "inPosition", "inNormal", "inTexCoord");
-	T(1, 0, -2, trans);
-	glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, trans);
-    DrawModel(windmillBalcony, program, "inPosition", "inNormal", "inTexCoord");
-*/
-    T(-5, -7, 0, trans);
+    T(-3.9, -7.4, 0, trans);
     S(0.8, 0.8, 0.8, shear);
     Mult(trans, shear, total);
-	glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, total);    DrawModel(windmillWalls, program, "inPosition", "inNormal", "inTexCoord");
+	glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, total);
+    DrawModel(windmillRoof, program, "inPosition", "inNormal", "inTexCoord");
 
-    T(0, 0, 0, trans);
-    S(0.5, 0.5, 0.5, shear);
+    T(-3.9, -7.4, 0, trans);
+    S(0.8, 0.8, 0.8, shear);
     Mult(trans, shear, total);
-	Rx(t/1000, rot);
-    Mult(rot, total, total);
 	glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, total);
-    DrawModel(blade, program, "inPosition", "inNormal", "inTexCoord");
-	T(0, 0, 0, trans);
-    S(0.5, 0.5, 0.5, shear);
-    Mult(trans, shear, total);
-	Rx(PI / 2 + t/1000, rot);
-    Mult(rot, total, total);
-	glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, total);
-    DrawModel(blade, program, "inPosition", "inNormal", "inTexCoord");
-	T(0, 0, 0, trans);
-    S(0.5, 0.5, 0.5, shear);
-    Mult(trans, shear, total);
-	Rx(PI + t/1000, rot);
-    Mult(rot, total, total);
-	glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, total);
-    DrawModel(blade, program, "inPosition", "inNormal", "inTexCoord");
-	T(0, 0, 0, trans);
-    S(0.5, 0.5, 0.5, shear);
-    Mult(trans, shear, total);
-	Rx(3 * PI / 2 + t/1000, rot);
-    Mult(rot, total, total);
-	glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, total);
-    DrawModel(blade, program, "inPosition", "inNormal", "inTexCoord");
+    DrawModel(windmillBalcony, program, "inPosition", "inNormal", "inTexCoord");
 
+    T(-3.9, -7.4, 0, trans);
+    S(0.8, 0.8, 0.8, shear);
+    Mult(trans, shear, total);
+	glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, total);    
+	DrawModel(windmillWalls, program, "inPosition", "inNormal", "inTexCoord");
+
+	int i;
+	for (i = 0; i < 4; i++) {
+	    T(0, 0, 0, trans);
+	    S(0.5, 0.5, 0.5, shear);
+	    Mult(trans, shear, total);
+		Rx(i * PI / 2 + t/1000, rot);
+	    Mult(rot, total, total);
+		glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, total);
+	    DrawModel(blade, program, "inPosition", "inNormal", "inTexCoord");
+	}
 
 	printError("display");
 

@@ -147,34 +147,16 @@ void display(void) {
 	glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, total);    
 	DrawModel(windmillWalls, program, "inPosition", "inNormal", "inTexCoord");
 
-    T(0, 0, 0, trans);
-    S(0.5, 0.5, 0.5, shear);
-    Mult(trans, shear, total);
-	Rx(t/1000, rot);
-    Mult(rot, total, total);
-	glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, total);
-    DrawModel(blade, program, "inPosition", "inNormal", "inTexCoord");
-	T(0, 0, 0, trans);
-    S(0.5, 0.5, 0.5, shear);
-    Mult(trans, shear, total);
-	Rx(PI / 2 + t/1000, rot);
-    Mult(rot, total, total);
-	glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, total);
-    DrawModel(blade, program, "inPosition", "inNormal", "inTexCoord");
-	T(0, 0, 0, trans);
-    S(0.5, 0.5, 0.5, shear);
-    Mult(trans, shear, total);
-	Rx(PI + t/1000, rot);
-    Mult(rot, total, total);
-	glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, total);
-    DrawModel(blade, program, "inPosition", "inNormal", "inTexCoord");
-	T(0, 0, 0, trans);
-    S(0.5, 0.5, 0.5, shear);
-    Mult(trans, shear, total);
-	Rx(3 * PI / 2 + t/1000, rot);
-    Mult(rot, total, total);
-	glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, total);
-    DrawModel(blade, program, "inPosition", "inNormal", "inTexCoord");
+	int i;
+	for (i = 0; i < 4; i++) {
+	    T(0, 0, 0, trans);
+	    S(0.5, 0.5, 0.5, shear);
+	    Mult(trans, shear, total);
+		Rx(i * PI / 2 + t/1000, rot);
+	    Mult(rot, total, total);
+		glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, total);
+	    DrawModel(blade, program, "inPosition", "inNormal", "inTexCoord");
+	}
 
 
 	printError("display");
@@ -229,7 +211,7 @@ int main(int argc, char *argv[]) {
 	glutCreateWindow ("GL3 white triangle example");
 	glutDisplayFunc(display);
 	initKeymapManager();
-	glutPassiveMotionFunc(MouseController);
+//	glutPassiveMotionFunc(MouseController);
 	glutTimerFunc(20, &OnTimer, 0);
 	init ();
 	glutMainLoop();
