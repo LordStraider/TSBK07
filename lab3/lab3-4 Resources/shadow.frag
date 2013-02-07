@@ -1,10 +1,7 @@
 #version 150
  
-in vec2 exTexCoord;
 in vec3 exNormal; 
 out vec4 outColor;
-uniform sampler2D texUnit;
-
 
 void main(void)
 {
@@ -14,5 +11,5 @@ void main(void)
 	shade = dot(normalize(exNormal), light);
 	shade = clamp(shade, 0, 1);
 
-	outColor = texture(texUnit, exTexCoord);// * vec4(shade, shade, shade, 1.0);
+	outColor = vec4(1.0, 0.0, 0.0, 1.0) * vec4(shade, shade, shade, 1.0);
 }
