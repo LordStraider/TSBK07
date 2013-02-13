@@ -39,13 +39,21 @@ GLfloat projMatrix[] = {        2.0f*near/(right-left), 0.0f, (right+left)/(righ
                                 0.0f, 0.0f, -1.0f, 0.0f };
 
 GLfloat camPos;
+GLfloat yCamPos;
 GLfloat camMod;
 GLfloat xModify;
 GLfloat xValue;
+GLfloat yModify;
+GLfloat yValue;
 GLfloat zModify;
 GLfloat zValue;
-GLfloat xLookAt;
-GLfloat yLookAt;
+
+float gravity;
+float angle;
+float angleMod;
+float rotate;
+float speed;
+bool menuPressed;
 
 GLuint program;
 GLuint programShade;
@@ -75,10 +83,19 @@ void init(void) {
     glActiveTexture(GL_TEXTURE0);
     printError("GL inits");
 
+    xModify = 0.0;
+    yModify = 0.0;
+    zModify = 0.0;
     xValue = 0.0;
+    yValue = 0.5;
     zValue = -2.0;
-    yLookAt = 0.0;
-    xLookAt = 0.0;
+    gravity = 0.0;
+    rotate = M_PI / 2;
+    angle = 0.0;
+    camPos = M_PI / 2;
+    menuPressed = false;
+    yCamPos = 2.0;
+
 
     /* Load and compile shader*/
     program = loadShaders("lab3-1.vert", "lab3-1.frag");
@@ -106,12 +123,12 @@ void init(void) {
     glUniformMatrix4fv(glGetUniformLocation(programShade, "projMatrix"), 1, GL_TRUE, projMatrix);
 
 
-
+/*
     glUniform3fv(glGetUniformLocation(programShade, "lightSourcesDirPosArr"), 4, &lightSourcesDirectionsPositions[0].x);
     glUniform3fv(glGetUniformLocation(programShade, "lightSourcesColorArr"), 4, &lightSourcesColorsArr[0].x);
     glUniform1fv(glGetUniformLocation(programShade, "specularExponent"), 4, specularExponent);
     glUniform1iv(glGetUniformLocation(programShade, "isDirectional"), 4, isDirectional);
-
+*/
 
 
     printError("init arrays");
@@ -126,12 +143,20 @@ void display(void) {
     glUseProgram(program);
 
     GLfloat t = (GLfloat)glutGet(GLUT_ELAPSED_TIME);
+
     camPos += camMod;
-    SetVector(xValue + 3 * cos(camPos), 2.0, zValue + 3 * sin(camPos), &p);
-    SetVector(xValue, 2.5, zValue, &l);
 
+    xValue += xModify * speed;
+    yValue += yModify;
+    zValue += zModify * speed;
 
-    lookAt(&p, &l, 0.0, 1.0, 0.0, &cam);
+    if (yModify == 0) {
+        yCamPos = yValue+2;
+    }
+    SetVector(xValue + 5 * cos(camPos), yCamPos, zValue + 5 * sin(camPos), &p);
+    SetVector(xValue, yCamPos + 0.5, zValue, &l);
+
+    lookAt(&p, &l, 0.0, 1.0, 0.0, cam);
     cam[3] = 0;
     cam[7] = 0;
     cam[11] = 0;
@@ -202,50 +227,87 @@ void display(void) {
     glutSwapBuffers();
 }
 
-void MouseController(int x, int y){
-    if (x > 200) {
-        xLookAt += 0.15;
-    } else {
-        xLookAt -= 0.15;
-    }
 
-    if (y > 200) {
-        yLookAt -= 0.15;
-    } else {
-        yLookAt += 0.15;
-    }
-    
-//  glutWarpPointer(100, 100);
-    SetVector(xLookAt, yLookAt, 0, &l);
-}
-
-void OnTimer(int value) {
+void keyController(){
     xModify = 0.0;
     zModify = 0.0;
+    angleMod = 0.0;
     camMod = 0.0;
-    
+    rotate = camPos + M_PI / 2;
+    float rotateFront = 0.0;
+    float rotateSide = 0.0;
+    speed = 1.0;
+
+
+    if (keyIsDown('<')){
+        speed = 2.0;
+    }
     
     if (keyIsDown('w')){
-        zModify = -0.15;
-    } 
+        xModify += -0.2 * cos(camPos);
+        zModify += -0.2 * sin(camPos);
+    }
     if (keyIsDown('s')){
-        zModify = 0.15;
-    } 
+        xModify += 0.2 * cos(camPos);
+        zModify += 0.2 * sin(camPos);
+        rotateFront = - M_PI;
+    }
     if (keyIsDown('a')){
-        xModify = -0.15;
-    } 
+        xModify += -0.2 * sin(camPos);
+        zModify += 0.2 * cos(camPos);
+        rotateSide = - M_PI / 2;
+    }
     if (keyIsDown('d')){
-        xModify = 0.15;
+        xModify += 0.2 * sin(camPos);
+        zModify += -0.2 * cos(camPos);
+        rotateSide = M_PI / 2;
+    } 
+
+    if (keyIsDown('w') && keyIsDown('a')){
+        rotate += - M_PI / 4;
+    } else if (keyIsDown('w') && keyIsDown('d')){
+        rotate += M_PI / 4;
+    } else if (keyIsDown('s') && keyIsDown('a')){
+        rotate += - 3 * M_PI / 4;
+    } else if (keyIsDown('s') && keyIsDown('d')){
+        rotate += 3 * M_PI / 4;
+    } else {
+        rotate += rotateFront + rotateSide;
     }
 
-    if (keyIsDown('x')) {
-        camMod = 0.08;
-    } else if (keyIsDown('z')) {
-        camMod = -0.08;
+    if (keyIsDown('e')) {
+        angleMod = M_PI / 60;
+        camMod = M_PI / 60;
+    } else if (keyIsDown('q')) {
+        angleMod = -M_PI / 60;
+        camMod = -M_PI / 60;
     }
 
-    xValue += xModify;
-    zValue += zModify;
+    if (keyIsDown('m')) {
+        menuPressed = !menuPressed;
+    }
+
+    if (keyIsDown(' ') && yValue == 0.5) { 
+        gravity = -0.18;
+        yValue = 0.55;
+    }
+
+    if (gravity < 0 && yValue > 0.5) {
+        gravity += 0.035;
+        yModify -= gravity;
+    } else if (yValue > 1.5) {
+        gravity += 0.01;
+        yModify -= gravity;
+    } else {
+        yModify = 0;
+        yValue = 0.5;
+        gravity = 0;
+    }
+}
+
+
+void OnTimer(int value) {
+    keyController();
 
     glutPostRedisplay();
     glutTimerFunc(20, &OnTimer, value);
