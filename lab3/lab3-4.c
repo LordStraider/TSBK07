@@ -14,18 +14,18 @@
 GLfloat rot[16], trans[16], shear[16], total[16], cam[16];
 
 
-Point3D lightSourcesColorsArr[] = { {1.0f, 0.0f, 0.0f}, // Red light
-                                 {0.0f, 1.0f, 0.0f}, // Green light
-                                 {0.0f, 0.0f, 1.0f}, // Blue light
-                                 {1.0f, 1.0f, 1.0f} }; // White light
+Point3D lightSourcesColorsArr[] = {  {1.0f, 0.0f, 0.0f}, // Red light
+                                     {0.0f, 1.0f, 0.0f}, // Green light
+                                     {0.0f, 0.0f, 1.0f}, // Blue light
+                                     {1.0f, 1.0f, 1.0f} }; // White light
 
 GLfloat specularExponent[] = {10.0, 20.0, 60.0, 5.0};
 GLint isDirectional[] = {0,0,1,1};
 
-Point3D lightSourcesDirectionsPositions[] = { {10.0f, 5.0f, 0.0f}, // Red light, positional
-                                       {0.0f, 5.0f, 10.0f}, // Green light, positional
-                                       {-1.0f, 0.0f, 0.0f}, // Blue light along X
-                                       {0.0f, 0.0f, -1.0f} }; // White light along Z
+Point3D lightSourcesDirectionsPositions[] = {  {10.0f, 5.0f, 0.0f}, // Red light, positional
+                                               {0.0f, 5.0f, 10.0f}, // Green light, positional
+                                               {-1.0f, 0.0f, 0.0f}, // Blue light along X
+                                               {0.0f, 0.0f, -1.0f} }; // White light along Z
                                        
 #define near 1.0
 #define far 90.0
@@ -104,6 +104,14 @@ void init(void) {
     glUniformMatrix4fv(glGetUniformLocation(program, "projMatrix"), 1, GL_TRUE, projMatrix);
     glUseProgram(programShade);
     glUniformMatrix4fv(glGetUniformLocation(programShade, "projMatrix"), 1, GL_TRUE, projMatrix);
+
+
+
+    glUniform3fv(glGetUniformLocation(programShade, "lightSourcesDirPosArr"), 4, &lightSourcesDirectionsPositions[0].x);
+    glUniform3fv(glGetUniformLocation(programShade, "lightSourcesColorArr"), 4, &lightSourcesColorsArr[0].x);
+    glUniform1fv(glGetUniformLocation(programShade, "specularExponent"), 4, specularExponent);
+    glUniform1iv(glGetUniformLocation(programShade, "isDirectional"), 4, isDirectional);
+
 
 
     printError("init arrays");

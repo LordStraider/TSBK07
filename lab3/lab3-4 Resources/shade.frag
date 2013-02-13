@@ -3,6 +3,12 @@
 in vec3 exNormal; 
 out vec4 outColor;
 
+uniform vec3 lightSourcesDirPosArr[4];
+uniform vec3 lightSourcesColorArr[4];
+uniform float specularExponent[4];
+uniform bool isDirectional[4];
+
+
 void main(void)
 {
 	const vec3 light = vec3(0.58, 0.58, 0.58);
