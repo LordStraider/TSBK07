@@ -26,7 +26,7 @@ Point3D lightSourcesDirectionsPositions[] = {  {10.0f, 5.0f, 0.0f}, // Red light
                                                {0.0f, 5.0f, 10.0f}, // Green light, positional
                                                {-1.0f, 0.0f, 0.0f}, // Blue light along X
                                                {0.0f, 0.0f, -1.0f} }; // White light along Z
-                                       
+
 #define near 1.0
 #define far 90.0
 #define right 0.5
@@ -123,12 +123,12 @@ void init(void) {
     glUniformMatrix4fv(glGetUniformLocation(programShade, "projMatrix"), 1, GL_TRUE, projMatrix);
 
 
-/*
+
     glUniform3fv(glGetUniformLocation(programShade, "lightSourcesDirPosArr"), 4, &lightSourcesDirectionsPositions[0].x);
     glUniform3fv(glGetUniformLocation(programShade, "lightSourcesColorArr"), 4, &lightSourcesColorsArr[0].x);
     glUniform1fv(glGetUniformLocation(programShade, "specularExponent"), 4, specularExponent);
     glUniform1iv(glGetUniformLocation(programShade, "isDirectional"), 4, isDirectional);
-*/
+
 
 
     printError("init arrays");
@@ -157,10 +157,12 @@ void display(void) {
     SetVector(xValue, yCamPos + 0.5, zValue, &l);
 
     lookAt(&p, &l, 0.0, 1.0, 0.0, cam);
-    cam[3] = 0;
-    cam[7] = 0;
-    cam[11] = 0;
-    glUniformMatrix4fv(glGetUniformLocation(program, "camMatrix"), 1, GL_TRUE, cam);
+    GLfloat tmp[16];
+    CopyMatrix(cam, tmp);
+    tmp[3] = 0;
+    tmp[7] = 0;
+    tmp[11] = 0;
+    glUniformMatrix4fv(glGetUniformLocation(program, "camMatrix"), 1, GL_TRUE, tmp);
   
 
     glDisable(GL_DEPTH_TEST);
@@ -175,7 +177,6 @@ void display(void) {
     glEnable(GL_CULL_FACE);
 
 
-    lookAt(&p, &l, 0.0, 1.0, 0.0, &cam);
     glUniformMatrix4fv(glGetUniformLocation(program, "camMatrix"), 1, GL_TRUE, cam);
 
 //    DrawModel(bunny, program, "inPosition", "inNormal", "inTexCoord");
@@ -236,7 +237,7 @@ void keyController(){
     rotate = camPos + M_PI / 2;
     float rotateFront = 0.0;
     float rotateSide = 0.0;
-    speed = 1.0;
+    speed = 1.5;
 
 
     if (keyIsDown('<')){

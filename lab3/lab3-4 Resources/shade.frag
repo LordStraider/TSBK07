@@ -1,15 +1,19 @@
 #version 150
- 
+
+
 in vec3 exNormal; 
 in vec3 surf;
 out vec4 outColor;
 
 
-/*uniform vec3 lightSourcesDirPosArr[4];
+
+uniform vec3 lightSourcesDirPosArr[4];
 uniform vec3 lightSourcesColorArr[4];
 uniform float specularExponent[4];
 uniform bool isDirectional[4];
-*/
+
+
+
 
 void main(void)
 {
@@ -17,21 +21,37 @@ void main(void)
 	float shade;
 	
 	shade = dot(normalize(exNormal), light);
-	shade = clamp(shade, 0, 1);
+	clamp(shade, 0, 1);
 
 
-	/* Shaders? */
-/*	vec3 reflectedLightDirection = reflect(-ligntSourceDirPosArr[0], 1);
-	vec3 eyeDirection = Normailize(-surf);
+	vec3 eyeDirection = normalize(-surf);
+	vec3 reflectedLightDirection;
+	vec3 lightDirection;
+	float specularStrength;
+	float shadeR = 0.0;
+	float shadeG = 0.0;
+	float shadeB = 0.0;
+	
+	for (int i = 0; i < 4; i++) {
+		lightDirection = lightSourcesDirPosArr[i];
+		reflectedLightDirection = reflect(-lightDirection, exNormal);
+		specularStrength = 0.0;
+		
+		if (dot(lightDirection, exNormal) > 0.0) {
+			specularStrength = dot(reflectedLightDirection, eyeDirection);
+			specularStrength = max(specularStrength, 0.01);
+			specularStrength = pow(specularStrength, specularExponent[i]);
+		}
 
-	float specularStrength = 0.0;
-	if (dot(igntSourceDirPosArr[0], 1) > 0.0) {
-		specularStrength = dot(reflectedLightDirection, eyeDirection);
-		float exponent = 200.0;
-		specularStrength = max(specularStrength, 0.01);
-		specularStrength = pow(specularStrength, exponent);
+		shadeR += shade * 0.2 + specularStrength * 0.5 * lightSourcesColorArr[i].x;
+		shadeG += shade * 0.2 + specularStrength * 0.5 * lightSourcesColorArr[i].y;
+		shadeB += shade * 0.2 + specularStrength * 0.5 * lightSourcesColorArr[i].z;
 	}
 
-	outColor = vec4(specularStrength);*/
-	outColor = vec4(1.0, 0.0, 0.0, 1.0) * vec4(shade, shade, shade, 1.0);
+	clamp(shadeR, 0, 1);
+	clamp(shadeG, 0, 1);
+	clamp(shadeB, 0, 1);
+
+	outColor = vec4(shadeR, shadeG, shadeB, 1.0);
+
 }

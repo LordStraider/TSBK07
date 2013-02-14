@@ -15,7 +15,7 @@ void main(void)
 {
 	surf = inPosition;
 
-	mat3 normalMatrix = mat3(camMatrix * mdlMatrix);
+	mat3 normalMatrix = mat3(mdlMatrix);
 	exNormal = normalMatrix * inNormal;
 	
 	gl_Position = projMatrix * camMatrix * mdlMatrix * vec4(inPosition, 1.0);
