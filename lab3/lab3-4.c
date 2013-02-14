@@ -86,9 +86,9 @@ void init(void) {
     xModify = 0.0;
     yModify = 0.0;
     zModify = 0.0;
-    xValue = 0.0;
+    xValue = 00.0;
     yValue = 0.5;
-    zValue = -2.0;
+    zValue = 16.0;
     gravity = 0.0;
     rotate = M_PI / 2;
     angle = 0.0;
@@ -225,7 +225,8 @@ void display(void) {
 
     printError("display");
 
-    glutSwapBuffers();
+    glFlush();
+//    glutSwapBuffers();
 }
 
 
@@ -319,6 +320,7 @@ int main(int argc, char *argv[]) {
     glutInitWindowSize (800, 640);
     
     glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
     glutCreateWindow ("GL3 white triangle example");
     glutDisplayFunc(display);
     initKeymapManager();
