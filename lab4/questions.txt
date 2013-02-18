@@ -1,0 +1,40 @@
+=============  1  =============
+What kind of data does the heightmap image data hold? What range is the heightmap data?
+
+
+
+The terrain is 4x4. How many polygons does it draw?
+
+
+
+
+=============  2  =============
+Did you need to extend your camera movement code? How?
+
+
+
+
+=============  3  =============
+How did you implement the cross product? Function call, inline...? Normalization?
+Which method did you use to find the normal vector?
+
+
+
+
+
+=============  4  =============
+How did you figure out what surface to use?
+How did you calculate the height from the surface?
+
+
+
+=============  5  =============
+What kind of multitexturing function did you implement?
+How did you handle collisions?
+How did you represent the objects to make collision detection easy/managable?
+How did you apply the slope on objects?
+How did you identify the water surface?
+How did you move the camera? What distance did you use over the terrain?
+How did you decide whether to draw the model or not?
+Why don't you have to test the near plane?
+How did you decide which sections to draw?

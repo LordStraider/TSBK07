@@ -10,6 +10,8 @@
 #include "VectorUtils2.h"
 #include "loadobj.h"
 #include "LoadTGA2.h"
+#include "constants.h"
+#include "controller.h"
 
 GLfloat projectionMatrix[16];
 
@@ -73,7 +75,6 @@ Model* GenerateTerrain(TextureData *tex)
 // vertex array object
 Model *m, *m2, *tm;
 // Reference to shader program
-GLuint program;
 GLuint tex1, tex2;
 TextureData ttex; // terrain
 
@@ -108,20 +109,29 @@ void display(void)
 	// clear the screen
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
+
 	GLfloat total[16], modelView[16], camMatrix[16];
 	
+    camPos += camMod;
+
+    xValue += xModify * speed;
+    yValue += yModify;
+    zValue += zModify * speed;
+
+    if (yModify == 0) {
+        yCamPos = yValue+2;
+    }
+    SetVector(xValue + 5 * cos(camPos), yCamPos, zValue + 5 * sin(camPos), &p);
+    SetVector(xValue, yCamPos + 0.5, zValue, &l);
+
+    lookAt(&p, &l, 0.0, 1.0, 0.0, camMatrix);
+    
 	printError("pre display");
 	
 	glUseProgram(program);
 
 	// Build matrix
 	
-	Point3D cam = {0, 5, 8};
-	Point3D lookAtPoint = {2, 0, 2};
-	lookAt(&cam,
-				&lookAtPoint,
-				0, 1, 0,
-				camMatrix);
 	IdentityMatrix(modelView);
 	Mult(camMatrix, modelView, total);
 	glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, total);
@@ -136,6 +146,8 @@ void display(void)
 
 void timer(int i)
 {
+    keyController();
+
 	glutTimerFunc(20, &timer, i);
 	glutPostRedisplay();
 }
