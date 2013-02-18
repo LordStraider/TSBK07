@@ -3,6 +3,7 @@
 
 in vec3 exNormal; 
 in vec3 surf;
+in vec3 exCam;
 out vec4 outColor;
 
 
@@ -42,28 +43,30 @@ void main(void)
 	diffuse = max(0.0, diffuse); // No negative light
 
 
-	vec3 eyeDirection = normalize(-surf);
+	vec3 eyeDirection = normalize(-exCam);
 	vec3 reflected;
 	vec3 lightDirection;
 	float specularStrength;
-	float shadeR = diffuse * 0.7;
-	float shadeG = diffuse * 0.7;
-	float shadeB = diffuse * 0.7;
+	float shadeR = 0;//diffuse * 0.7;
+	float shadeG = 0;//diffuse * 0.7;
+	float shadeB = 0;//diffuse * 0.7;
 	
 	for (int i = 0; i < 4; i++) {
+		specularStrength = 0.0;
 		lightDirection = lightSourcesDirPosArr[i];
 		reflected = reflect(-lightDirection, normalize(exNormal));
 
-		specularStrength = dot(reflected, eyeDirection);
+		specularStrength = dot(reflected, normalize(-surf));
 		
 		if (dot(lightDirection, exNormal) > 0.0) {
-			specularStrength = max(specularStrength, 0.01);
+			//specularStrength = max(specularStrength, 0.01);
 			specularStrength = pow(specularStrength, specularExponent[i]);
 		}
+		specularStrength = max(specularStrength, 0.0);
 
-		shadeR += specularStrength * 0.6 * lightSourcesColorArr[i].x;
-		shadeG += specularStrength * 0.6 * lightSourcesColorArr[i].y;
-		shadeB += specularStrength * 0.6 * lightSourcesColorArr[i].z;
+		shadeR += specularStrength * 0.01;// * lightSourcesColorArr[i].x;
+		shadeG += specularStrength * 0.01;// * lightSourcesColorArr[i].y;
+		shadeB += specularStrength * 0.01;// * lightSourcesColorArr[i].z;
 	}
 
 	shadeR = clamp(shadeR, 0, 1);
@@ -71,5 +74,32 @@ void main(void)
 	shadeB = clamp(shadeB, 0, 1);
 
 	outColor = vec4(shadeR, shadeG, shadeB, 1.0);
+//*/
+/*
+	vec3 s;
+	vec3 h;
+	float alpha;
+	float ispec;
+
+	for (int i = 0; i < 4; i++) {
+		ispec = 0.0;
+		s = lightSourcesDirPosArr[i];
+
+		h = (s + exCam) / abs(s + exCam);
+
+		alpha = dot(normalize(exNormal), normalize(h));
+
+		ispec = pow(alpha, 50);
+
+		shadeR += ispec * 0.6 * lightSourcesColorArr[i].x;
+		shadeG += ispec * 0.6 * lightSourcesColorArr[i].y;
+		shadeB += ispec * 0.6 * lightSourcesColorArr[i].z;
+	}
+
+	shadeR = clamp(shadeR, 0, 1);
+	shadeG = clamp(shadeG, 0, 1);
+	shadeB = clamp(shadeB, 0, 1);
+	outColor = vec4(shadeR, shadeG, shadeB, 1.0);
+//*/
 //*/
 }
