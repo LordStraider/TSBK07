@@ -24,8 +24,8 @@ GLint isDirectional[] = {0,0,1,1};
 
 Point3D lightSourcesDirectionsPositions[] = {  {10.0f, 5.0f, 0.0f}, // Red light, positional
                                                {0.0f, 5.0f, 10.0f}, // Green light, positional
-                                               {-1.0f, 0.0f, 0.0f}, // Blue light along X
-                                               {0.0f, 0.0f, -1.0f} }; // White light along Z
+                                               {-10.0f, 0.0f, 0.0f}, // Blue light along X
+                                               {0.0f, 0.0f, -10.0f} }; // White light along Z
 
 #define near 1.0
 #define far 90.0
@@ -56,6 +56,7 @@ float speed;
 bool menuPressed;
 
 GLuint program;
+GLuint programMultitex;
 GLuint programShade;
 Point3D p,l;
 
@@ -65,6 +66,7 @@ Model *windmillRoof;
 Model *windmillBalcony;
 Model *skyBox;
 Model *ground;
+Model *bunny;
 
 GLuint bunnyTex;
 GLuint groundTex;
@@ -83,13 +85,13 @@ void init(void) {
     glActiveTexture(GL_TEXTURE0);
     printError("GL inits");
 
+    gravity = -0.18;
     xModify = 0.0;
-    yModify = 0.0;
+    yModify = 0.55;
     zModify = 0.0;
-    xValue = 00.0;
+    xValue = 0.0;
     yValue = 0.5;
     zValue = 16.0;
-    gravity = 0.0;
     rotate = M_PI / 2;
     angle = 0.0;
     camPos = M_PI / 2;
@@ -100,6 +102,7 @@ void init(void) {
     /* Load and compile shader*/
     program = loadShaders("lab3-1.vert", "lab3-1.frag");
     programShade = loadShaders("Shade.vert", "Shade.frag");
+    programMultitex = loadShaders("multitex.vert", "multitex.frag");
     glUseProgram(program);
     printError("init shader");
     /* Upload geometry to the GPU:*/
@@ -109,13 +112,16 @@ void init(void) {
     windmillWalls = LoadModelPlus("windmill-walls.obj");
     blade = LoadModelPlus("blade.obj");
     skyBox = LoadModelPlus("skybox.obj");
-    ground = LoadModelPlus("skybox.obj");
+    ground = LoadModelPlus("cubeplus.obj");
+    bunny = LoadModelPlus("bunnyplus.obj");
 
     LoadTGATextureSimple("grass.tga", &groundTex);
     LoadTGATextureSimple("maskros512.tga", &bunnyTex);
     LoadTGATextureSimple("skyBox512.tga", &skyBoxTex);
 
     glUniform1i(glGetUniformLocation(program, "texUnit"), 0); // Texture unit 0
+    glUniform1i(glGetUniformLocation(programMultitex, "texUnit"), 1); // Texture unit 1
+    glUniform1i(glGetUniformLocation(programMultitex, "texUnit2"), 2); // Texture unit 2
 
     /* End of upload of geometry*/
     glUniformMatrix4fv(glGetUniformLocation(program, "projMatrix"), 1, GL_TRUE, projMatrix);
@@ -130,6 +136,9 @@ void init(void) {
     glUniform1iv(glGetUniformLocation(programShade, "isDirectional"), 4, isDirectional);
 
 
+
+    glUseProgram(programMultitex);
+    glUniformMatrix4fv(glGetUniformLocation(programMultitex, "projMatrix"), 1, GL_TRUE, projMatrix);
 
     printError("init arrays");
 }
@@ -169,9 +178,12 @@ void display(void) {
     glDisable(GL_CULL_FACE);
 
     T(0, 0, 0, trans);
+    glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, skyBoxTex);
+    glUniform1i(glGetUniformLocation(program, "texUnit"), 0); // Texture unit 0
     glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, trans);
     DrawModel(skyBox, program, "inPosition", "inNormal", "inTexCoord");
+
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
@@ -179,19 +191,63 @@ void display(void) {
 
     glUniformMatrix4fv(glGetUniformLocation(program, "camMatrix"), 1, GL_TRUE, cam);
 
-//    DrawModel(bunny, program, "inPosition", "inNormal", "inTexCoord");
-//    DrawModel(cow, program, "inPosition", "inNormal", "inTexCoord");
 
-    T(0, 1, 0, trans);
-    S(70,0, 70, shear);
-    Mult(shear, trans, total);
+    T(0, 0, 0, trans);
+    S(150,0, 150, shear);
+    Mult(trans, shear, total);
+    glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, groundTex);
     glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, total);
     DrawModel(ground, program, "inPosition", "inNormal", "inTexCoord");
 
 
 
+    glUseProgram(programMultitex);
+    glEnable(GL_BLEND);
+    glDisable(GL_DEPTH_TEST);
+
+    glUniformMatrix4fv(glGetUniformLocation(programMultitex, "camMatrix"), 1, GL_TRUE, cam);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, bunnyTex);
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, skyBoxTex);
+    glUniform1i(glGetUniformLocation(programMultitex, "texUnit"), 1); // Texture unit 1
+    glUniform1i(glGetUniformLocation(programMultitex, "texUnit2"), 2); // Texture unit 2
+
+    yValue += yModify;
+
+    if (gravity < 0 && yValue > 0.5) {
+        gravity += 0.03;
+        yModify -= gravity;
+    } else if (yValue > 0.5) {
+        gravity += 0.006;
+        yModify -= gravity;
+    } else {
+        gravity = -0.28;
+        yValue = 0.55;
+        yModify = 0.0;
+    }
+
+    int i, k;
+//    for (k = -7; k < 7; k++) {
+        for (i = -7; i < 7; i++) {
+//            T(i * 10, yValue, k * 10, trans);
+            T(i * 10, 2.5, 10, trans);
+            S(5,5,5, shear);
+            Mult(trans, shear, total);
+            glUniformMatrix4fv(glGetUniformLocation(programMultitex, "mdlMatrix"), 1, GL_TRUE, total);
+            DrawModel(bunny, programMultitex, "inPosition", "inNormal", "inTexCoord");
+        }
+//    }
+
+    glEnable(GL_DEPTH_TEST);
+    glDisable(GL_BLEND);
+
+
+
     glUseProgram(programShade);
+    glUniform3fv(glGetUniformLocation(programShade, "inCam"), 3, &p);
+
     glUniformMatrix4fv(glGetUniformLocation(programShade, "camMatrix"), 1, GL_TRUE, cam);
     T(-3.9, 0, 0, trans);
     S(0.8, 0.8, 0.8, shear);
@@ -211,7 +267,6 @@ void display(void) {
     glUniformMatrix4fv(glGetUniformLocation(programShade, "mdlMatrix"), 1, GL_TRUE, total);    
     DrawModel(windmillWalls, programShade, "inPosition", "inNormal", "inTexCoord");
 
-    int i;
     for (i = 0; i < 4; i++) {
         T(0, 7.4, 0, trans);
         S(0.5, 0.5, 0.5, shear);
@@ -238,7 +293,7 @@ void keyController(){
     rotate = camPos + M_PI / 2;
     float rotateFront = 0.0;
     float rotateSide = 0.0;
-    speed = 1.5;
+    speed = 1.0;
 
 
     if (keyIsDown('<')){
@@ -321,11 +376,12 @@ int main(int argc, char *argv[]) {
     
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
-    glutCreateWindow ("GL3 white triangle example");
+    glutCreateWindow ("GL3 mulitcolored triangles example");
     glutDisplayFunc(display);
     initKeymapManager();
     //glutPassiveMotionFunc(MouseController);
     glutTimerFunc(20, &OnTimer, 0);
     init ();
+    glBlendFunc(GL_SRC_ALPHA,GL_ONE);
     glutMainLoop();
 }
