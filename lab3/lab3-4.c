@@ -23,9 +23,9 @@ GLfloat specularExponent[] = {10.0, 20.0, 60.0, 5.0};
 GLint isDirectional[] = {0,0,1,1};
 
 Point3D lightSourcesDirectionsPositions[] = {  {10.0f, 5.0f, 0.0f}, // Red light, positional
-                                               {0.0f, 5.0f, 10.0f}, // Green light, positional
+                                               {0.0f, 15.0f, 10.0f}, // Green light, positional
                                                {-10.0f, 0.0f, 0.0f}, // Blue light along X
-                                               {0.0f, 0.0f, -10.0f} }; // White light along Z
+                                               {0.0f, 0.0f, -15.0f} }; // White light along Z
 
 #define near 1.0
 #define far 90.0

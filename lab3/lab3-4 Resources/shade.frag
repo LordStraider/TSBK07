@@ -1,14 +1,15 @@
 #version 150
 
 
-in vec3 exNormal; 
-in vec3 surf;
-in vec3 exCam;
+in vec3 exNormal;		//Model coordinates
+in vec3 surf;			//Model coordinates
+in vec3 exCam;			//World coordinates
+in mat3 exCamMatrix;	
+in mat3 exMdlMatrix;	
+
 out vec4 outColor;
 
-
-
-uniform vec3 lightSourcesDirPosArr[4];
+uniform vec3 lightSourcesDirPosArr[4];	//World coordinates
 uniform vec3 lightSourcesColorArr[4];
 uniform float specularExponent[4];
 uniform bool isDirectional[4];
@@ -18,6 +19,10 @@ uniform bool isDirectional[4];
 
 void main(void)
 {
+	vec3 cam = exCamMatrix * exCam;
+	vec3 norm = normalize(exCamMatrix * exNormal);
+	vec3 pos = exCamMatrix * exMdlMatrix * surf;
+
 /*	const vec3 light = vec3(0.58, 0.58, 0.58); // Given in VIEW coordinates!
 	float diffuse, specular, shade;
 	
@@ -35,38 +40,32 @@ void main(void)
 	shade = 0.7*diffuse + 1.0*specular;
 	outColor = vec4(shade, shade, shade, 1.0);
 //*/
-	const vec3 light = vec3(0.58, 0.58, 0.58); // Given in VIEW coordinates!
-	float diffuse, specular, shade;
 	
-	// Diffuse
-	diffuse = dot(normalize(exNormal), light);
-	diffuse = max(0.0, diffuse); // No negative light
 
-
-	vec3 eyeDirection = normalize(-exCam);
+	vec3 eyeDirection = normalize(cam - pos);
 	vec3 reflected;
 	vec3 lightDirection;
 	float specularStrength;
-	float shadeR = 0;//diffuse * 0.7;
-	float shadeG = 0;//diffuse * 0.7;
-	float shadeB = 0;//diffuse * 0.7;
+	float shadeR = 0;//diffuse * 0.2;
+	float shadeG = 0;//diffuse * 0.2;
+	float shadeB = 0;//diffuse * 0.2;
 	
 	for (int i = 0; i < 4; i++) {
 		specularStrength = 0.0;
-		lightDirection = lightSourcesDirPosArr[i];
-		reflected = reflect(-lightDirection, normalize(exNormal));
+		lightDirection = exCamMatrix * lightSourcesDirPosArr[i];
+		reflected = reflect(-lightDirection, exNormal);
 
-		specularStrength = dot(reflected, normalize(-surf));
+		specularStrength = dot(reflected, eyeDirection);
 		
 		if (dot(lightDirection, exNormal) > 0.0) {
-			//specularStrength = max(specularStrength, 0.01);
+			specularStrength = max(specularStrength, 0.01);
 			specularStrength = pow(specularStrength, specularExponent[i]);
 		}
-		specularStrength = max(specularStrength, 0.0);
+//		specularStrength = max(specularStrength, 0.0);
 
-		shadeR += specularStrength * 0.01;// * lightSourcesColorArr[i].x;
-		shadeG += specularStrength * 0.01;// * lightSourcesColorArr[i].y;
-		shadeB += specularStrength * 0.01;// * lightSourcesColorArr[i].z;
+		shadeR += specularStrength * 0.09;// * lightSourcesColorArr[i].x;
+		shadeG += specularStrength * 0.09;// * lightSourcesColorArr[i].y;
+		shadeB += specularStrength * 0.09;// * lightSourcesColorArr[i].z;
 	}
 
 	shadeR = clamp(shadeR, 0, 1);
