@@ -19,11 +19,11 @@ Point3D lightSourcesColorsArr[] = {  {1.0f, 0.0f, 0.0f}, // Red light
                                      {0.0f, 0.0f, 1.0f}, // Blue light
                                      {1.0f, 1.0f, 1.0f} }; // White light
 
-GLfloat specularExponent[] = {10.0, 20.0, 60.0, 5.0};
+GLfloat specularExponent[] = {60.0, 80.0, 40.0, 70.0};
 GLint isDirectional[] = {0,0,1,1};
 
 Point3D lightSourcesDirectionsPositions[] = {  {10.0f, 5.0f, 0.0f}, // Red light, positional
-                                               {0.0f, 15.0f, 10.0f}, // Green light, positional
+                                               {0.0f, 10.0f, 10.0f}, // Green light, positional
                                                {-10.0f, 0.0f, 0.0f}, // Blue light along X
                                                {0.0f, 0.0f, -15.0f} }; // White light along Z
 
@@ -211,7 +211,7 @@ void display(void) {
     DrawModel(ground, program, "inPosition", "inNormal", "inTexCoord");
 
 
-    T(0.0f, 15.0f, 10.0f, trans);
+    T(0.0f, 10.0f, 10.0f, trans);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, groundTex);
     glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, trans);

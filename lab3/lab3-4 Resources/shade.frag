@@ -40,7 +40,7 @@ void main(void)
 	vec3 reflected;
 	vec3 lightDirection;
 
-	vec3 eyeDirection = normalize( - vec3(mdlMatrix * vec4(surf, 1.0)));
+	vec3 eyeDirection = normalize( - surf);//vec3(camMatrix * vec4(surf, 1.0)));
 	vec3 norm = normalize(mat3(mdlMatrix) * exNormal);
 
 //	const vec3 light = vec3(0.58, 0.58, 0.58); // Given in VIEW coordinates!
@@ -56,24 +56,25 @@ void main(void)
 	float shadeB = 0;
 
 	for (int i = 0; i < 4; i++) {
-		diffuse = dot(norm, normalize(vec3(mdlMatrix * vec4(lightSourcesDirPosArr[i], 1.0))));
+		diffuse = dot(norm, normalize(lightSourcesDirPosArr[i]));
 		diffuse = max(0.0, diffuse); // No negative light
 		clamp(diffuse, 0, 1);
 
 		specularStrength = 0.0;
-		lightDirection = normalize(vec3(mdlMatrix * vec4(lightSourcesDirPosArr[i], 1.0)));
+		lightDirection = normalize(vec3(camMatrix * vec4(lightSourcesDirPosArr[i], 1.0)));// - vec3(mdlMatrix * vec4(surf, 1.0)));
 		reflected = reflect(-lightDirection, norm);
 
 		specularStrength = dot(reflected, eyeDirection);
 		
-		if (specularStrength > 0.0) {
+		//if (dot(-lightDirection, norm) > 0.0) {
+		//	specularStrength = max(specularStrength, 0.01);
 			specularStrength = pow(specularStrength, specularExponent[i]);
-		}
+		//}
 		specularStrength = max(specularStrength, 0.0);
 
-		shadeR += ( specularStrength * 0.9) * lightSourcesColorArr[i].x;
-		shadeG += ( specularStrength * 0.9) * lightSourcesColorArr[i].y;
-		shadeB += ( specularStrength * 0.9) * lightSourcesColorArr[i].z;
+		shadeR += ( diffuse * 0.7 + specularStrength * 0.9) * lightSourcesColorArr[i].x;
+		shadeG += ( diffuse * 0.7 + specularStrength * 0.9) * lightSourcesColorArr[i].y;
+		shadeB += ( diffuse * 0.7 + specularStrength * 0.9) * lightSourcesColorArr[i].z;
 	}
 
 	shadeR = clamp(shadeR, 0, 1);
