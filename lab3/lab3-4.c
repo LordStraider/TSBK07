@@ -144,7 +144,7 @@ void init(void) {
 }
 
 void display(void) {
-    printError("pre display");
+    int i, k;
 
     /* clear the screen*/
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -173,6 +173,7 @@ void display(void) {
     tmp[11] = 0;
     glUniformMatrix4fv(glGetUniformLocation(program, "camMatrix"), 1, GL_TRUE, tmp);
   
+/* ================================================================== */
 
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_CULL_FACE);
@@ -188,6 +189,7 @@ void display(void) {
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
 
+/* ================================================================== */
 
     glUniformMatrix4fv(glGetUniformLocation(program, "camMatrix"), 1, GL_TRUE, cam);
 
@@ -200,11 +202,80 @@ void display(void) {
     glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, total);
     DrawModel(ground, program, "inPosition", "inNormal", "inTexCoord");
 
+/* ================================================================== */
 
+    T(10.0f, 5.0f, 0.0f, trans);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, groundTex);
+    glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, trans);
+    DrawModel(ground, program, "inPosition", "inNormal", "inTexCoord");
+
+
+    T(0.0f, 15.0f, 10.0f, trans);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, groundTex);
+    glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, trans);
+    DrawModel(ground, program, "inPosition", "inNormal", "inTexCoord");
+
+
+    T(-10.0f, 0.0f, 0.0f, trans);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, groundTex);
+    glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, trans);
+    DrawModel(ground, program, "inPosition", "inNormal", "inTexCoord");
+
+
+    T(0.0f, 0.0f, -15.0f, trans);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, groundTex);
+    glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, trans);
+    DrawModel(ground, program, "inPosition", "inNormal", "inTexCoord");
+
+/* ================================================================== */
+
+    glUseProgram(programShade);
+    glUniform3fv(glGetUniformLocation(programShade, "inCam"), 3, &p);
+
+    glUniformMatrix4fv(glGetUniformLocation(programShade, "camMatrix"), 1, GL_TRUE, cam);
+    T(-3.9, 0, 0, trans);
+    S(0.8, 0.8, 0.8, shear);
+    Mult(trans, shear, total);
+    //Ry(M_PI, rot);
+    //Mult(total, rot, total);
+    glUniformMatrix4fv(glGetUniformLocation(programShade, "mdlMatrix"), 1, GL_TRUE, total);
+    DrawModel(windmillRoof, programShade, "inPosition", "inNormal", "inTexCoord");
+
+    T(-3.9, 0, 0, trans);
+    S(0.8, 0.8, 0.8, shear);
+    Mult(trans, shear, total);
+    //Ry(M_PI, rot);
+    //Mult(total, rot, total);
+    glUniformMatrix4fv(glGetUniformLocation(programShade, "mdlMatrix"), 1, GL_TRUE, total);
+    DrawModel(windmillBalcony, programShade, "inPosition", "inNormal", "inTexCoord");
+
+    T(-3.9, 0, 0, trans);
+    S(0.8, 0.8, 0.8, shear);
+    Mult(trans, shear, total);
+    //Ry(M_PI, rot);
+    //Mult(total, rot, total);
+    glUniformMatrix4fv(glGetUniformLocation(programShade, "mdlMatrix"), 1, GL_TRUE, total);    
+    DrawModel(windmillWalls, programShade, "inPosition", "inNormal", "inTexCoord");
+    for (i = 0; i < 4; i++) {
+        T(0, 7.4, 0, trans);
+        S(0.5, 0.5, 0.5, shear);
+        Mult(trans, shear, total);
+        Rx(i * PI / 2 + t/1000, rot);
+        Mult(total, rot, total);
+        glUniformMatrix4fv(glGetUniformLocation(programShade, "mdlMatrix"), 1, GL_TRUE, total);
+        DrawModel(blade, programShade, "inPosition", "inNormal", "inTexCoord");
+    }
+
+/* ================================================================== */
 
     glUseProgram(programMultitex);
     glEnable(GL_BLEND);
-    glDisable(GL_DEPTH_TEST);
+    //glDisable(GL_CULL_FACE);
+    //glDisable(GL_DEPTH_TEST);
 
     glUniformMatrix4fv(glGetUniformLocation(programMultitex, "camMatrix"), 1, GL_TRUE, cam);
     glActiveTexture(GL_TEXTURE1);
@@ -228,9 +299,8 @@ void display(void) {
         yModify = 0.0;
     }
 
-    int i, k;
 //    for (k = -7; k < 7; k++) {
-        for (i = -7; i < 7; i++) {
+        for (i = 2; i > -2; i--) {
 //            T(i * 10, yValue, k * 10, trans);
             T(i * 10, 2.5, 10, trans);
             S(5,5,5, shear);
@@ -240,45 +310,13 @@ void display(void) {
         }
 //    }
 
-    glEnable(GL_DEPTH_TEST);
+    //glEnable(GL_DEPTH_TEST);
+    //glEnable(GL_CULL_FACE);
     glDisable(GL_BLEND);
 
 
 
-    glUseProgram(programShade);
-    glUniform3fv(glGetUniformLocation(programShade, "inCam"), 3, &p);
 
-    glUniformMatrix4fv(glGetUniformLocation(programShade, "camMatrix"), 1, GL_TRUE, cam);
-    T(-3.9, 0, 0, trans);
-    S(0.8, 0.8, 0.8, shear);
-    Mult(trans, shear, total);
-    glUniformMatrix4fv(glGetUniformLocation(programShade, "mdlMatrix"), 1, GL_TRUE, total);
-    DrawModel(windmillRoof, programShade, "inPosition", "inNormal", "inTexCoord");
-
-    T(-3.9, 0, 0, trans);
-    S(0.8, 0.8, 0.8, shear);
-    Mult(trans, shear, total);
-    glUniformMatrix4fv(glGetUniformLocation(programShade, "mdlMatrix"), 1, GL_TRUE, total);
-    DrawModel(windmillBalcony, programShade, "inPosition", "inNormal", "inTexCoord");
-
-    T(-3.9, 0, 0, trans);
-    S(0.8, 0.8, 0.8, shear);
-    Mult(trans, shear, total);
-    glUniformMatrix4fv(glGetUniformLocation(programShade, "mdlMatrix"), 1, GL_TRUE, total);    
-    DrawModel(windmillWalls, programShade, "inPosition", "inNormal", "inTexCoord");
-
-    for (i = 0; i < 4; i++) {
-        T(0, 7.4, 0, trans);
-        S(0.5, 0.5, 0.5, shear);
-        Mult(trans, shear, total);
-        Rx(i * PI / 2 + t/1000, rot);
-        Mult(total, rot, total);
-        glUniformMatrix4fv(glGetUniformLocation(programShade, "mdlMatrix"), 1, GL_TRUE, total);
-        DrawModel(blade, programShade, "inPosition", "inNormal", "inTexCoord");
-    }
-
-
-    printError("display");
 
     glFlush();
 //    glutSwapBuffers();
@@ -293,7 +331,7 @@ void keyController(){
     rotate = camPos + M_PI / 2;
     float rotateFront = 0.0;
     float rotateSide = 0.0;
-    speed = 1.0;
+    speed = 0.8;
 
 
     if (keyIsDown('<')){
@@ -382,6 +420,8 @@ int main(int argc, char *argv[]) {
     //glutPassiveMotionFunc(MouseController);
     glutTimerFunc(20, &OnTimer, 0);
     init ();
+    //glBlendFunc(GL_ONE, GL_ONE);
     glBlendFunc(GL_SRC_ALPHA,GL_ONE);
+    //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glutMainLoop();
 }
