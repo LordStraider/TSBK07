@@ -13,7 +13,11 @@
 #include "constants.h"
 #include "controller.h"
 
-GLfloat projectionMatrix[16];
+GLfloat projectionMatrix[16], trans[16], shear[16], total[16];
+GLuint texWidth;
+Model *groundSphere;
+GLfloat *vertexArray;
+GLuint *indexArray;
 
 Model* GenerateTerrain(TextureData *tex)
 {
@@ -21,11 +25,13 @@ Model* GenerateTerrain(TextureData *tex)
 	int triangleCount = (tex->width-1) * (tex->height-1) * 2;
 	int x, z;
 	
-	GLfloat *vertexArray = malloc(sizeof(GLfloat) * 3 * vertexCount);
+	vertexArray = malloc(sizeof(GLfloat) * 3 * vertexCount);
 	GLfloat *normalArray = malloc(sizeof(GLfloat) * 3 * vertexCount);
 	GLfloat *texCoordArray = malloc(sizeof(GLfloat) * 2 * vertexCount);
-	GLuint *indexArray = malloc(sizeof(GLuint) * triangleCount*3);
+	indexArray = malloc(sizeof(GLuint) * triangleCount*3);
 	
+	texWidth = tex->width;
+
 	printf("bpp %d\n", tex->bpp);
 	for (x = 0; x < tex->width; x++)
 		for (z = 0; z < tex->height; z++)
@@ -148,6 +154,9 @@ void init(void)
 	program = loadShaders("terrain.vert", "terrain.frag");
 	glUseProgram(program);
 	printError("init shader");
+
+
+    groundSphere = LoadModelPlus("groundsphere.obj");
 	
 	glUniformMatrix4fv(glGetUniformLocation(program, "projMatrix"), 1, GL_TRUE, projectionMatrix);
 	glUniform1i(glGetUniformLocation(program, "tex"), 0); // Texture unit 0
@@ -155,9 +164,63 @@ void init(void)
 	
 // Load terrain data
 	
-	LoadTGATexture("ok2.tga", &ttex);
+	LoadTGATexture("ok1.tga", &ttex);
 	tm = GenerateTerrain(&ttex);
 	printError("init terrain");
+}
+
+bool SameSide(Point3D *p1, Point3D *p2, Point3D *a, Point3D *b) {
+	Point3D sub1, sub2, sub3, result, result2;
+	VectorSub(b, a, &sub1);
+	VectorSub(p1, a, &sub2);
+	VectorSub(p2, a, &sub3);
+    CrossProduct(&sub1, &sub2, &result);
+    CrossProduct(&sub1, &sub3, &result2);
+    
+    if (DotProduct(&result, &result2) >= 0) {
+    	return true;
+    }
+
+    return false;
+}
+
+bool PointInTriangle(Point3D *p, Point3D *a, Point3D *b, Point3D *c) {
+    if (SameSide(p,a, b,c) && SameSide(p,b, a,c) && SameSide(p,c, a,b)) {
+    	return true;
+    }
+
+  	return false;
+}
+
+GLfloat findY(int x, int z) {
+	GLuint triangle1[3]; 
+	GLuint triangle2[3]; 
+	GLfloat y = 0.0;
+
+	triangle1[0] = indexArray[(x + z * (texWidth-1))*6 + 0]; //x
+	triangle1[1] = indexArray[(x + z * (texWidth-1))*6 + 1]; //y
+	triangle1[2] = indexArray[(x + z * (texWidth-1))*6 + 2]; //z
+	triangle2[0] = indexArray[(x + z * (texWidth-1))*6 + 3]; //x
+	triangle2[1] = indexArray[(x + z * (texWidth-1))*6 + 4]; //y
+	triangle2[2] = indexArray[(x + z * (texWidth-1))*6 + 5]; //z
+
+	Point3D p, v1, v2, v3;
+
+	SetVector(x, 0, z, &p);
+	SetVector(vertexArray[triangle1[0]*3 + 0], 0, vertexArray[triangle1[0]*3 + 2], &v1);
+	SetVector(vertexArray[triangle1[1]*3 + 0], 0, vertexArray[triangle1[1]*3 + 2], &v2);
+	SetVector(vertexArray[triangle1[2]*3 + 0], 0, vertexArray[triangle1[2]*3 + 2], &v2);
+
+	if (PointInTriangle(&p, &v1, &v2, &v3)) {
+		y = vertexArray[triangle1[1]*3 + 1];
+		printf("this is y in 1: %f\n", y);
+	} else {
+		y = vertexArray[triangle2[1]*3 + 1];
+		printf("this is y in 2: %f\n", y);
+	}
+
+//	printf("this is y: %d\n", y);
+	return y;
 }
 
 void display(void)
@@ -166,7 +229,7 @@ void display(void)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
 
-	GLfloat total[16], modelView[16], camMatrix[16];
+	GLfloat total[16], modelView[16], camMatrix[16], tmp[16], rot[16];
 	
     camPos += camMod;
 
@@ -190,10 +253,19 @@ void display(void)
 	
 	IdentityMatrix(modelView);
 	Mult(camMatrix, modelView, total);
+	IdentityMatrix(tmp);
+	glUniformMatrix4fv(glGetUniformLocation(program, "camMatrix"), 1, GL_TRUE, tmp);
 	glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, total);
 	
 	glBindTexture(GL_TEXTURE_2D, tex1);		// Bind Our Texture tex1
 	DrawModel(tm, program, "inPosition", "inNormal", "inTexCoord");
+
+    T(xValue, findY(xValue, zValue), zValue, trans);
+    Ry(rotate+angle, rot);
+    Mult(trans, rot, total);
+	glUniformMatrix4fv(glGetUniformLocation(program, "camMatrix"), 1, GL_TRUE, camMatrix);
+    glUniformMatrix4fv(glGetUniformLocation(program, "mdlMatrix"), 1, GL_TRUE, total);
+    DrawModel(groundSphere, program, "inPosition", "inNormal", "inTexCoord");
 
 	printError("display 2");
 	

@@ -7,7 +7,7 @@ uniform sampler2D tex;
 
 void main(void)
 {
-	const vec3 light = vec3(0.58, 0.58, 0.58);
+	const vec3 light = vec3(0.58, 1.0, 0.58);
 	float shade;
 	
 	shade = dot(normalize(exNormal), light);
