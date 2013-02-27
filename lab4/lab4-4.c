@@ -204,20 +204,34 @@ GLfloat findY(int x, int z) {
 	triangle2[1] = indexArray[(x + z * (texWidth-1))*6 + 4]; //y
 	triangle2[2] = indexArray[(x + z * (texWidth-1))*6 + 5]; //z
 
-	Point3D p, v1, v2, v3;
+	Point3D p, v1, v2, v3, norm;
 
 	SetVector(x, 0, z, &p);
 	SetVector(vertexArray[triangle1[0]*3 + 0], 0, vertexArray[triangle1[0]*3 + 2], &v1);
 	SetVector(vertexArray[triangle1[1]*3 + 0], 0, vertexArray[triangle1[1]*3 + 2], &v2);
-	SetVector(vertexArray[triangle1[2]*3 + 0], 0, vertexArray[triangle1[2]*3 + 2], &v2);
+	SetVector(vertexArray[triangle1[2]*3 + 0], 0, vertexArray[triangle1[2]*3 + 2], &v3);
 
+	GLfloat d; 
 	if (PointInTriangle(&p, &v1, &v2, &v3)) {
-		y = vertexArray[triangle1[1]*3 + 1];
-		printf("this is y in 1: %f\n", y);
+		SetVector(vertexArray[triangle1[0]*3 + 0], vertexArray[triangle1[0]*3 + 1], vertexArray[triangle1[0]*3 + 2], &v1);
+		SetVector(vertexArray[triangle1[1]*3 + 0], vertexArray[triangle1[1]*3 + 1], vertexArray[triangle1[1]*3 + 2], &v2);
+		SetVector(vertexArray[triangle1[2]*3 + 0], vertexArray[triangle1[2]*3 + 1], vertexArray[triangle1[2]*3 + 2], &v3);
+
+
+		CalcNormalVector(&v1, &v2, &v3, &norm);
 	} else {
-		y = vertexArray[triangle2[1]*3 + 1];
-		printf("this is y in 2: %f\n", y);
+		SetVector(vertexArray[triangle2[0]*3 + 0], vertexArray[triangle2[0]*3 + 1], vertexArray[triangle2[0]*3 + 2], &v1);
+		SetVector(vertexArray[triangle2[1]*3 + 0], vertexArray[triangle2[1]*3 + 1], vertexArray[triangle2[1]*3 + 2], &v2);
+		SetVector(vertexArray[triangle2[2]*3 + 0], vertexArray[triangle2[2]*3 + 1], vertexArray[triangle2[2]*3 + 2], &v3);
+
+		CalcNormalVector(&v1, &v2, &v3, &norm);
 	}
+
+	Normalize(&norm);
+	// A * x + B * y + C * z - D = 0 => y = (D - A*x - C*z) / B
+	d = norm.x * v1.x + norm.y * v1.y + norm.z * v1.z;
+	y = (d - norm.x * v1.x - norm.z * v1.z) / norm.y;
+	printf("this is y: %f, d: %f, x: %f, y: %f, z: %f, x: %f, y: %f, z: %f\n", y, d, norm.x, norm.y, norm.z, v1.x, v1.y, v1.z);
 
 //	printf("this is y: %d\n", y);
 	return y;
@@ -282,7 +296,7 @@ void timer(int i)
 
 void mouse(int x, int y)
 {
-	printf("%d %d\n", x, y);
+	//printf("%d %d\n", x, y);
 }
 
 int main(int argc, char **argv)
