@@ -26,6 +26,7 @@ Model* GenerateTerrain(TextureData *tex)
 	ballY = malloc(sizeof(GLfloat) * 100);
 	
 	texWidth = tex->width;
+	GLfloat y;
 
 	printf("bpp %d\n", tex->bpp);
 	for (x = 0; x < tex->width; x++)
@@ -33,7 +34,11 @@ Model* GenerateTerrain(TextureData *tex)
 		{
 // Vertex array. You need to scale this properly
 			vertexArray[(x + z * tex->width)*3 + 0] = x;
-			vertexArray[(x + z * tex->width)*3 + 1] = tex->imageData[(x + z * tex->width) * (tex->bpp/8)] / 50.0;
+			y = tex->imageData[(x + z * tex->width) * (tex->bpp/8)] / 50.0;
+			if (y < 1.5) {
+				y = 1.5;
+			}
+			vertexArray[(x + z * tex->width)*3 + 1] = y;
 			vertexArray[(x + z * tex->width)*3 + 2] = z;
 // Normal vectors. You need to calculate these.
 			normalArray[(x + z * tex->width)*3 + 0] = 0.0;
@@ -155,7 +160,7 @@ void init(void)
 	
 // Load terrain data
 	
-	LoadTGATexture("ok1.tga", &ttex);
+	LoadTGATexture("fft-terrain.tga", &ttex);
 	tm = GenerateTerrain(&ttex);
 	printError("init terrain");
 }
@@ -227,13 +232,13 @@ void testCollision(GLfloat y) {
 	for (i = 1; i < 11; i++){
 		for (j = 1; j < 11; j++){
 			Point3D center1, center2, result;
-			SetVector(xValue, y, zValue, &center1);
-			SetVector(i*10, ballY[(i-1) + (j-1)*10], j*10, &center2);
+			SetVector(xValue, y+0.5, zValue, &center1);
+			SetVector(i*10, ballY[(i-1) + (j-1)*10]+0.5, j*10, &center2);
 
 			VectorSub(&center2, &center1, &result);
 			//printf("x: %f, y: %f, z: %f, i: %d, j: %d, sqrt: %f\n", result.x, result.y, result.z, i, j, sqrt(result.x * result.x + result.y * result.y + result.z * result.z));
 
-			if (sqrt(result.x * result.x + result.y * result.y + result.z * result.z) < 1.99) {
+			if (sqrt(result.x * result.x + result.y * result.y + result.z * result.z) < 1.97) {
 			    xValue -= xModify * speed;
 			    zValue -= zModify * speed;
 			    return 0;
@@ -250,7 +255,7 @@ void display(void)
 	GLfloat total[16], modelView[16], camMatrix[16], tmp[16], rot[16];
 	
     camPos += camMod;
-    GLfloat y,y2;
+    GLfloat y;
     
     xValue += xModify * speed;
     yValue += yModify;
@@ -258,14 +263,8 @@ void display(void)
     y = findY(xValue, zValue);
 	testCollision(y);
 
-    y2 = findY(xValue + 5 * cos(camPos), zValue + 5 * sin(camPos));
-
-    if (y > 7) {
-    	SetVector(xValue + 5 * cos(camPos), y+1, zValue + 5 * sin(camPos), &p);
-    } else {
-    	SetVector(xValue + 5 * cos(camPos), 4, zValue + 5 * sin(camPos), &p);
-    }
-    SetVector(xValue, 4, zValue, &l);
+   	SetVector(xValue + 9 * cos(camPos), y+2, zValue + 9 * sin(camPos), &p);
+    SetVector(xValue, y+3, zValue, &l);
 
     
     lookAt(&p, &l, 0.0, 1.0, 0.0, camMatrix);
@@ -277,7 +276,7 @@ void display(void)
 	p.y += 14;
 	int b = 0;
     glUniform3fv(glGetUniformLocation(program, "camPos"), 1, &p);
-    glUniform1fv(glGetUniformLocation(program, "useSpec"), 1, &b);
+    glUniform1fv(glGetUniformLocation(program, "mode"), 1, &b);
 
 	// Build matrix
 	
@@ -291,7 +290,7 @@ void display(void)
 	DrawModel(tm, program, "inPosition", "inNormal", "inTexCoord");
 	
 	b = 1;
-    glUniform1fv(glGetUniformLocation(program, "useSpec"), 1, &b);
+    glUniform1fv(glGetUniformLocation(program, "mode"), 1, &b);
     T(xValue, findY(xValue, zValue), zValue, trans);
     Ry(rotate+angle, rot);
     Mult(trans, rot, total);

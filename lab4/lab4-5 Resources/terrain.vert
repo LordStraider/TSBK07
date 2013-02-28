@@ -4,6 +4,7 @@ in  vec3 inPosition;
 in  vec3 inNormal;
 in vec2 inTexCoord;
 out vec2 texCoord;
+out vec3 exPos;
 out vec3 exNormal;
 
 
@@ -15,6 +16,7 @@ uniform mat4 camMatrix;
 void main(void)
 {
 	texCoord = inTexCoord;
+	exPos = inPosition;
 	
 	mat3 normalMatrix = mat3(mdlMatrix);
 	exNormal = normalMatrix * inNormal;
