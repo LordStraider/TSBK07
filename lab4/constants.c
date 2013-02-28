@@ -22,6 +22,7 @@ GLuint texWidth;
 Model *groundSphere;
 GLfloat *vertexArray;
 GLuint *indexArray;
+GLfloat *ballY;
 
 // vertex array object
 Model *m, *m2, *tm;

@@ -33,6 +33,7 @@ extern GLfloat projectionMatrix[16], trans[16], shear[16], total[16];
 extern GLuint texWidth;
 extern Model *groundSphere;
 extern GLfloat *vertexArray;
+extern GLfloat *ballY;
 extern GLuint *indexArray;
 
 // vertex array object

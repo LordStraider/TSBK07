@@ -25,10 +25,7 @@ void main(void)
 	vec3 eyeDirection = normalize( - surf);//vec3(camMatrix * vec4(surf, 1.0)));
 	vec3 norm = normalize(mat3(mdlMatrix) * exNormal);
 
-	float diffuse;
-	
-
-	float specularStrength;
+	float diffuse, specularStrength;
 	float shadeR = 0;
 	float shadeG = 0;
 	float shadeB = 0;
