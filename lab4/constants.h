@@ -29,5 +29,16 @@ extern float angleMod;
 extern float rotate;
 extern float speed;
 
+extern GLfloat projectionMatrix[16], trans[16], shear[16], total[16];
+extern GLuint texWidth;
+extern Model *groundSphere;
+extern GLfloat *vertexArray;
+extern GLuint *indexArray;
+
+// vertex array object
+extern Model *m, *m2, *tm;
+// Reference to shader program
+extern GLuint tex1, tex2;
+
 extern Point3D p,l;
 extern GLuint program;

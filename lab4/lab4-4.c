@@ -216,17 +216,13 @@ GLfloat findY(int x, int z) {
 		SetVector(vertexArray[triangle1[0]*3 + 0], vertexArray[triangle1[0]*3 + 1], vertexArray[triangle1[0]*3 + 2], &v1);
 		SetVector(vertexArray[triangle1[1]*3 + 0], vertexArray[triangle1[1]*3 + 1], vertexArray[triangle1[1]*3 + 2], &v2);
 		SetVector(vertexArray[triangle1[2]*3 + 0], vertexArray[triangle1[2]*3 + 1], vertexArray[triangle1[2]*3 + 2], &v3);
-
-
-		CalcNormalVector(&v1, &v2, &v3, &norm);
 	} else {
 		SetVector(vertexArray[triangle2[0]*3 + 0], vertexArray[triangle2[0]*3 + 1], vertexArray[triangle2[0]*3 + 2], &v1);
 		SetVector(vertexArray[triangle2[1]*3 + 0], vertexArray[triangle2[1]*3 + 1], vertexArray[triangle2[1]*3 + 2], &v2);
 		SetVector(vertexArray[triangle2[2]*3 + 0], vertexArray[triangle2[2]*3 + 1], vertexArray[triangle2[2]*3 + 2], &v3);
-
-		CalcNormalVector(&v1, &v2, &v3, &norm);
 	}
 
+	CalcNormalVector(&v1, &v2, &v3, &norm);
 	Normalize(&norm);
 	// A * x + B * y + C * z - D = 0 => y = (D - A*x - C*z) / B
 	d = norm.x * v1.x + norm.y * v1.y + norm.z * v1.z;
