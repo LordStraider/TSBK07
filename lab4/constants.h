@@ -5,7 +5,8 @@
 #import <ApplicationServices/ApplicationServices.h>
 #include "GL_utilities.h"
 #include "loadobj.h"
-#include "VectorUtils2.h"
+#include "LoadTGA2.h"
+#include "VectorUtils3.h"
 
 
 
@@ -29,7 +30,7 @@ extern float angleMod;
 extern float rotate;
 extern float speed;
 
-extern GLfloat projectionMatrix[16], trans[16], shear[16], total[16];
+extern mat4 projectionMatrix, trans, shear, total;
 extern GLuint texWidth;
 extern Model *groundSphere;
 extern GLfloat *vertexArray;
@@ -43,3 +44,7 @@ extern GLuint tex1, tex2;
 
 extern Point3D p,l;
 extern GLuint program;
+
+extern TextureData ttex; // terrain
+
+void init();

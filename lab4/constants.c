@@ -17,7 +17,7 @@ float angleMod;
 float rotate;
 float speed;
 
-GLfloat projectionMatrix[16], trans[16], shear[16], total[16];
+mat4 projectionMatrix, trans, shear, total;
 GLuint texWidth;
 Model *groundSphere;
 GLfloat *vertexArray;
@@ -33,6 +33,37 @@ Point3D p,l;
 GLuint program;
 
 
+
+TextureData ttex; // terrain
+
+void init(void)
+{
+	// GL inits
+	glClearColor(0.2,0.2,0.5,0);
+	glEnable(GL_DEPTH_TEST);
+	glDisable(GL_CULL_FACE);
+	printError("GL inits");
+
+	projectionMatrix = frustum(-0.1, 0.1, -0.1, 0.1, 0.2, 50.0);
+
+	// Load and compile shader
+	program = loadShaders("terrain.vert", "terrain.frag");
+	glUseProgram(program);
+	printError("init shader");
+
+
+    groundSphere = LoadModelPlus("groundsphere.obj");
+	
+	glUniformMatrix4fv(glGetUniformLocation(program, "projMatrix"), 1, GL_TRUE, projectionMatrix.m);
+	glUniform1i(glGetUniformLocation(program, "tex"), 0); // Texture unit 0
+	LoadTGATextureSimple("grass.tga", &tex1);
+	
+// Load terrain data
+	
+	LoadTGATexture("fft-terrain.tga", &ttex);
+	tm = GenerateTerrain(&ttex);
+	printError("init terrain");
+}
 
 
 
