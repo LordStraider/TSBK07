@@ -1,6 +1,15 @@
 #include "constants.h"
 
 
+
+mat4 rot;
+mat4 trans;
+mat4 shear;
+mat4 total;
+mat4 cam;
+mat4 projectionMatrix;
+
+GLfloat *ballY;
 GLfloat camPos;
 GLfloat yCamPos;
 GLfloat camMod;
@@ -16,26 +25,23 @@ float angle;
 float angleMod;
 float rotate;
 float speed;
-
-mat4 projectionMatrix, trans, shear, total;
-GLuint texWidth;
-Model *groundSphere;
-GLfloat *vertexArray;
-GLuint *indexArray;
-GLfloat *ballY;
-
-// vertex array object
-Model *m, *m2, *tm;
-// Reference to shader program
-GLuint tex1, tex2;
+bool menuPressed;
 
 Point3D p,l;
 GLuint program;
+GLuint tex1;
 
+GLuint texWidth;
+GLfloat *vertexArray;
+GLuint *indexArray;
+
+Model *groundSphere;
+Model *tm;
+//Model *windmill2;
 
 
 TextureData ttex; // terrain
-
+/*
 void init(void)
 {
 	// GL inits
@@ -64,6 +70,6 @@ void init(void)
 	tm = GenerateTerrain(&ttex);
 	printError("init terrain");
 }
-
+*/
 
 

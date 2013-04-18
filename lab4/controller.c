@@ -1,6 +1,6 @@
 #include "controller.h"
 
-
+/*
 Model* GenerateTerrain(TextureData *tex)
 {
     int vertexCount = tex->width * tex->height;
@@ -71,7 +71,7 @@ Point3D(vertexArray[((x+k) + (z+j) * tex->width)*3 + 0], vertexArray[((x+k) + (z
             normalArray[(x + z * tex->width)*3 + 1] = 1.0;
             normalArray[(x + z * tex->width)*3 + 2] = 0.0;
         }*/
-
+/*
     Point3D p;
     Point3D cross;
     Point3D sum;
@@ -182,7 +182,7 @@ GLfloat findY(int x, int z) {
     y = (d - norm.x * v1.x - norm.z * v1.z) / norm.y;
     
     return y;
-}
+}*/
 
 void keyController(){
     xModify = 0.0;
